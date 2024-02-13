@@ -1,6 +1,6 @@
 # mlmn-findoc
 
-Millenium Project for FinDoc
+Millennium Project for FinDoc
 
 Contributers
 Alisha Lin (PM)
