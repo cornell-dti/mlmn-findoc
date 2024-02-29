@@ -21,7 +21,7 @@ def sum_doc(doc: str):
     chat = ChatOpenAI(
         temperature=0,
         model="gpt-3.5-turbo-0125",
-        openai_api_key="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",
+        openai_api_key="YOUR_OPENAI_KEY",
     )
     human_message = HumanMessagePromptTemplate.from_template(HUMAN_PROMPT)
     system_message = SystemMessagePromptTemplate.from_template(SYSTEM_PROMPT)

@@ -1,0 +1,67 @@
+{
+  "course_title": "Introduction to Analysis of Algorithms",
+  "course_code": "CS 4820/5820",
+  "semester": "Spring 2022",
+  "instructor": {
+    "name": "Eshan Chattopadhyay",
+    "office": "Gates Hall 319",
+    "email": "eshan@cs.cornell.edu",
+    "office_hours": [
+      {
+        "day": "Monday",
+        "time": "10:30am-11:30am"
+      },
+      {
+        "day": "Thursday",
+        "time": "1:30pm-2:30pm"
+      }
+    ]
+  },
+  "lectures": {
+    "days": ["Monday", "Wednesday", "Friday"],
+    "time": "9:05am-9:55am",
+    "location": "Uris Hall G01"
+  },
+  "course_description": "This course develops techniques used in the design and analysis of algorithms, with an emphasis on problems arising in computing applications. Example applications are drawn from systems and networks, artificial intelligence, computer vision, data mining, and computational biology.",
+  "learning_objectives": [
+    "Identify problems solvable with different algorithm design techniques",
+    "Analyze computational efficiency of algorithms",
+    "Recognize computationally intractable problems",
+    "Apply algorithmic techniques for intractable problems",
+    "Understand and implement famous algorithms",
+    "Write proofs and analyze algorithmic runtime"
+  ],
+  "textbooks": [
+    "Algorithm Design by Jon Kleinberg and Eva Tardos",
+    "Introduction to Algorithms by T. Cormen, C. Leiserson, R. Rivest",
+    "Algorithms by S. Dasgupta, C. Papadimitriou, U. Vazirani"
+  ],
+  "prerequisites": ["CS 2800", "CS 2110", "CS 3110"],
+  "grading": {
+    "components": [
+      { "component": "homework", "weight": "35%" },
+      { "component": "participation", "weight": "5%" },
+      { "component": "prelim 1", "weight": "15%" },
+      { "component": "prelim 2", "weight": "15%" },
+      { "component": "final exam", "weight": "30%" }
+    ]
+  },
+  "collaboration_policy": "Collaboration is allowed on problem-solving ideas but solutions must be written up independently and acknowledge collaboration.",
+  "late_submissions_policy": {
+    "late_days_allowed": 6,
+    "penalty_structure": [
+      { "late_submission_hours": "0-12", "penalty": "20%" },
+      { "late_submission_hours": "12-48", "penalty": "additional 20%" }
+    ],
+    "exceptions": "Grades from a late submission count only if you have late days left."
+  },
+  "academic_integrity_policy": {
+    "collaboration_guidelines": "Collaborate on ideas, write up solutions independently, acknowledge collaborators.",
+    "admissible_resources": "Only course materials and discussions allowed, no external resources permitted."
+  },
+  "additional_information": {
+    "typesetting_requirements": "Homework must be typeset and submitted as PDF.",
+    "inclusiveness_statement": "Respectful communication and inclusive behavior are expected from all participants.",
+    "accommodations_policy": "Students with disabilities should request accommodations within the first three weeks of the semester."
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "course": {
+    "name": "BioMI 1100: The Microbiology of College Life",
+    "instructor": {
+      "name": "Kathleen Hefferon",
+      "email": "klh22@cornell.edu",
+      "office": "Wing Hall 106"
+    },
+    "office_hours": {
+      "instructor": {
+        "day": "Mondays",
+        "time": "4-5pm",
+        "location": "Rm 106 Wing Hall or on Zoom"
+      },
+      "TAs": [
+        {
+          "name": "Ana Maria Fernandez Galliano",
+          "email": "amf289@cornell.edu",
+          "office_hours": "Mondays 2-3pm Rm 267 Weill Hall"
+        },
+        {
+          "name": "Kevin Andrew England",
+          "email": "kae83@cornell.edu",
+          "office_hours": "Thursdays 2-3pm Rm 401 Wing Hall"
+        },
+        {
+          "name": "Upasana Basu",
+          "email": "ub39@cornell.edu",
+          "office_hours": "Wednesdays 2-3pm Rm 267 Weill Hall"
+        }
+      ]
+    },
+    "lectures": {
+      "days": ["Monday", "Wednesday", "Friday"],
+      "time": "12:20 - 1:10pm",
+      "location": "Uris Hall G01"
+    },
+    "textbook": "Stearns et al. 'Microbiology for Dummies'",
+    "course_description": "Microbial habitats are literally everywhere on a college campus. This class explores microbiology and microbial ecology as it relates to the college campus environment.",
+    "learning_objectives": [
+      "Demonstrate understanding of core microbiology concepts.",
+      "Recognize differences between pathogens, opportunists, and non-pathogenic microorganisms.",
+      "Describe how microorganisms facilitate major biogeochemical cycles.",
+      "Apply the scientific method and use objective observation.",
+      "Explain fundamental concepts of microbiology in written and oral formats."
+    ],
+    "grading": {
+      "midterm_1": "10%",
+      "midterm_2": "10%",
+      "final_exam": "25%",
+      "attendance_participation": "25%",
+      "homework_assignments": "20% on Canvas",
+      "wikipedia_assignment": "10%"
+    },
+    "modules": [
+      {
+        "title": "Introduction",
+        "lectures": [
+          { "date": "Mon Jan 22", "title": "Welcome and Overview" },
+          { "date": "Wed Jan 24", "title": "Zits and Dandruff" },
+          {
+            "date": "Fri Jan 26",
+            "title": "Critical Thinking online minicourse"
+          }
+        ]
+      },
+      {
+        "title": "The Microbiology of Growing Up",
+        "lectures": [
+          { "date": "Mon Jan 29", "title": "Head lice" },
+          { "date": "Wed Jan 31", "title": "Dental plaque and bad breath!" },
+          {
+            "date": "Fri Feb 2",
+            "title": "How to read a science paper, bacterial diversity"
+          }
+        ]
+      }
+    ],
+    "exams": {
+      "midterm_1": { "date": "Wed Feb 21", "activity": "No Activity!" },
+      "midterm_2": { "date": "Wed Mar 27", "activity": "No Activity!" },
+      "final_exam": { "date": "TBA" }
+    },
+    "assignments": {
+      "homework": "Each week during lecture, the instructor will assign multiple choice/short answer questions on Canvas.",
+      "wikipedia": "There will be one short written assignment (Wikipedia), which can be performed as a group or individually."
+    },
+    "late_work_policy": "Students are strongly encouraged to ensure on-time submission of assignments. Late submissions are penalized.",
+    "attendance_policy": "Attendance is highly recommended. You may miss a total of 2 discussion periods without penalty.",
+    "integrity_policy": "Sharing of materials from previous years is not permitted. Work presented in other courses is not acceptable.",
+    "mental_health_support": "The instructors, teaching assistants, and the university care about your wellbeing. Seek support if needed."
+  }
+}
