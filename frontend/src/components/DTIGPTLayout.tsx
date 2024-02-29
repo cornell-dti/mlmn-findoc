@@ -46,21 +46,28 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </div>
         <nav className="flex flex-col p-4">
           {pages.map((page) => (
-            <Link
-              key={page.index}
-              href={page.route}
-              className={`text-gray-300 hover:bg-blue-700 p-2 rounded mt-2 flex items-center ${
-                pathname === `/${page.route}`
-                  ? "text-sidebarTextActive"
-                  : "text-sidebarText"
-              }`}
-            >
-              {pathname === `/${page.route}` && (
-                <span className="absolute w-2 h-2 bg-green-500 rounded-full left-0 ml-1" />
+            <div key={page.index} className="mt-2 flex items-center relative">
+              {pathname === page.route && (
+                <span className="absolute left-0 ml-[-1.5rem]">
+                  <img
+                    src="/icons/green-pointer.png"
+                    alt="Active Icon"
+                    className="w-6 h-6"
+                  />
+                </span>
               )}
-              <img src={page.icon} alt={page.name} className="w-6 h-6 mr-2" />
-              <span>{page.name}</span>
-            </Link>
+              <Link
+                href={page.route}
+                className={`block text-gray-300 hover:bg-blue-700 p-2 rounded pl-8 flex items-center ${
+                  pathname === page.route
+                    ? "text-white" // Bright white for selected item
+                    : "text-gray-500" // Dull white (lower contrast) for non-selected items
+                }`}
+              >
+                <img src={page.icon} alt={page.name} className="w-6 h-6 mr-2" />
+                {page.name}
+              </Link>
+            </div>
           ))}
         </nav>
         <img
