@@ -15,7 +15,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex h-screen bg-black">
-      {" "}
       <aside
         className={`transform top-0 left-0 w-64 bg-[#000000] min-h-screen fixed transition-transform duration-200 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
