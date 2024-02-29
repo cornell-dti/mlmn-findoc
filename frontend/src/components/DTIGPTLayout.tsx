@@ -23,7 +23,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       >
         <button
           onClick={toggleSidebar}
-          className={`absolute top-1/2 right-0 -mr-6 transform -translate-y-1/2 bg-blue-900 rounded-full p-1 focus:outline-none ${
+          className={`absolute top-1/4 right-0 -mr-6 transform -translate-y-1/2 bg-blue-900 rounded-full p-1 focus:outline-none ${
             !sidebarOpen && "rotate-180"
           }`}
         >
