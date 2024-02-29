@@ -58,10 +58,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               )}
               <Link
                 href={page.route}
-                className={`block text-gray-300 hover:bg-blue-700 p-2 rounded pl-8 flex items-center ${
-                  pathname === page.route
-                    ? "text-white" // Bright white for selected item
-                    : "text-gray-500" // Dull white (lower contrast) for non-selected items
+                className={`block text-gray-300 hover:bg-blue-700 p-2 w-full rounded flex items-center ${
+                  pathname === page.route ? "text-white" : "text-gray-500"
                 }`}
               >
                 <img src={page.icon} alt={page.name} className="w-6 h-6 mr-2" />
