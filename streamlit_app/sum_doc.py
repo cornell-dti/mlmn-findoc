@@ -1,5 +1,5 @@
 # use streamlit run sum_doc.py to run
-
+import os
 import streamlit as st
 from langchain.prompts.chat import (
     ChatPromptTemplate,
@@ -7,6 +7,9 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
 )
 from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
 
 
 QUERY_INSTRUCTIONS = "Enter any query document to summarize:"
@@ -21,7 +24,7 @@ def sum_doc(doc: str):
     chat = ChatOpenAI(
         temperature=0,
         model="gpt-3.5-turbo-0125",
-        openai_api_key="YOUR_OPENAI_KEY",
+        openai_api_key=os.getenv("OPENAI_API_KEY"),
     )
     human_message = HumanMessagePromptTemplate.from_template(HUMAN_PROMPT)
     system_message = SystemMessagePromptTemplate.from_template(SYSTEM_PROMPT)
