@@ -9,7 +9,7 @@ from langchain.prompts.chat import (
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv, find_dotenv
 
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(), override=True)
 
 
 QUERY_INSTRUCTIONS = "Enter any query document to summarize:"
@@ -26,6 +26,7 @@ def sum_doc(doc: str):
         model="gpt-3.5-turbo-0125",
         openai_api_key=os.getenv("OPENAI_API_KEY"),
     )
+    print(os.getenv("OPENAI_API_KEY"))
     human_message = HumanMessagePromptTemplate.from_template(HUMAN_PROMPT)
     system_message = SystemMessagePromptTemplate.from_template(SYSTEM_PROMPT)
     chat_prompt = ChatPromptTemplate.from_messages([system_message, human_message])
