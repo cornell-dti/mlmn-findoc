@@ -36,5 +36,16 @@ def sum_doc(doc: str):
 if __name__ == "__main__":
     st.title("Document Summarizer")
     doc = st.text_area(QUERY_INSTRUCTIONS, height=100)
-    if st.button("Submit"):
+    if st.checkbox("Submit"):
         ans = st.write(sum_doc(doc=doc).content)
+        
+        unique_val  = 0 
+        follow_up_question = st.text_input("Enter a follow-up question")
+
+        while follow_up_question:
+            unique_val +=1
+            combined_context = f"{doc}\n\n{follow_up_question}"
+            response = sum_doc(doc=combined_context).content
+            st.write(response)
+            follow_up_question = st.text_input("Enter a follow-up question", key = unique_val)
+    
