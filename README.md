@@ -2,7 +2,7 @@
 
 Millennium Project for FinDoc
 
-Contributers
+Contributors
 Alisha Lin (PM)
 Tucker Stanley (Dev)
 Elizabeth Tang (Dev)
@@ -11,3 +11,4 @@ Lily Pham (Dev)
 Oscar Wang (Dev)
 Alyssa Zhang (Dev)
 Patricia Huang (Dev)
+Jasmine Li (Dev)
