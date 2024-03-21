@@ -13,13 +13,11 @@ load_dotenv(find_dotenv(), override=True)
 
 
 QUERY_INSTRUCTIONS1 = "Enter first query document to compare two documents:"
-QUERY_INSTRUCTIONS2= "Enter second query document to compare two documents:"
+QUERY_INSTRUCTIONS2 = "Enter second query document to compare two documents:"
 
 
-HUMAN_PROMPT = (
-    "Compare these two texts exactly:\n\n{text1}\n\n{text2}"
-)
-SYSTEM_PROMPT = "You are an AI designed to compare and contrast two different documents. Focus on highlighting the exact differences and similarities between the two documents."
+COMPARE_HUMAN_PROMPT = "Compare these two texts exactly:\n\n{text1}\n\n{text2}"
+COMPARE_SYSTEM_PROMPT = "You are an AI designed to compare and contrast two different documents. Focus on highlighting the exact differences and similarities between the two documents."
 
 
 def compare_docs(doc1: str, doc2: str):
@@ -28,8 +26,8 @@ def compare_docs(doc1: str, doc2: str):
         model="gpt-3.5-turbo-0125",
         openai_api_key=os.getenv("YOUR_OPENAI_KEY"),
     )
-    human_message = HumanMessagePromptTemplate.from_template(HUMAN_PROMPT)
-    system_message = SystemMessagePromptTemplate.from_template(SYSTEM_PROMPT)
+    human_message = HumanMessagePromptTemplate.from_template(COMPARE_HUMAN_PROMPT)
+    system_message = SystemMessagePromptTemplate.from_template(COMPARE_SYSTEM_PROMPT)
     chat_prompt = ChatPromptTemplate.from_messages([system_message, human_message])
     return chat(chat_prompt.format_prompt(text1=doc1, text2=doc2).to_messages())
 

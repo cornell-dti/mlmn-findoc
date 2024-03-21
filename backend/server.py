@@ -7,6 +7,8 @@ from langchain.prompts.chat import (
 )
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv, find_dotenv
+from sum_doc import sum_doc, get_resp
+from compare_docs import compare_docs
 
 server = Flask(__name__)
 load_dotenv(find_dotenv(), override=True)
@@ -24,32 +26,6 @@ FOLLOW_UP_PROMPT = (
 )
 
 
-def sum_doc(doc: str):
-    chat = ChatOpenAI(
-        temperature=0,
-        model="gpt-3.5-turbo-0125",
-        openai_api_key=os.getenv("OPENAI_API_KEY"),
-    )
-    print(os.getenv("OPENAI_API_KEY"))
-    human_message = HumanMessagePromptTemplate.from_template(HUMAN_PROMPT)
-    system_message = SystemMessagePromptTemplate.from_template(SYSTEM_PROMPT)
-    chat_prompt = ChatPromptTemplate.from_messages([system_message, human_message])
-    return chat(chat_prompt.format_prompt(text=doc).to_messages())
-
-
-def get_resp(sys_prompt: str, hmn_prompt: str):
-    chat = ChatOpenAI(
-        temperature=0,
-        model="gpt-3.5-turbo-0125",
-        openai_api_key=os.getenv("OPENAI_API_KEY"),
-    )
-    print(os.getenv("OPENAI_API_KEY"))
-    human_message = HumanMessagePromptTemplate.from_template(hmn_prompt)
-    system_message = SystemMessagePromptTemplate.from_template(sys_prompt)
-    chat_prompt = ChatPromptTemplate.from_messages([system_message, human_message])
-    return chat, chat_prompt
-
-
 @server.route("/")
 def testing():
     return "hi"
@@ -59,3 +35,10 @@ def testing():
 def summarize():
     content = request.args.get("message")
     return sum_doc(content).content
+
+
+@server.route("/compare", methods=["GET", "POST"])
+def compare():
+    content1 = request.args.get("message1")
+    content2 = request.args.get("message2")
+    return compare_docs(content1, content2).content

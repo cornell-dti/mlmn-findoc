@@ -14,10 +14,10 @@ load_dotenv(find_dotenv(), override=True)
 
 QUERY_INSTRUCTIONS = "Enter any query document to summarize:"
 
-HUMAN_PROMPT = (
+SUMMARIZE_HUMAN_PROMPT = (
     "Summarize this fictional story briefly. Use complete sentences.:\n\n{text}"
 )
-SYSTEM_PROMPT = "You are an AI designed to provide concise summaries. Focus on extracting key findings, implications, and any significant conclusions from the provided text, suitable for a general audience."
+SUMMARIZE_SYSTEM_PROMPT = "You are an AI designed to provide concise summaries. Focus on extracting key findings, implications, and any significant conclusions from the provided text, suitable for a general audience."
 
 FOLLOW_UP_PROMPT = (
     "This was your previous answer: {prev_ans}. Follow up question: {question}"
@@ -31,8 +31,8 @@ def sum_doc(doc: str):
         openai_api_key=os.getenv("OPENAI_API_KEY"),
     )
     print(os.getenv("OPENAI_API_KEY"))
-    human_message = HumanMessagePromptTemplate.from_template(HUMAN_PROMPT)
-    system_message = SystemMessagePromptTemplate.from_template(SYSTEM_PROMPT)
+    human_message = HumanMessagePromptTemplate.from_template(SUMMARIZE_HUMAN_PROMPT)
+    system_message = SystemMessagePromptTemplate.from_template(SUMMARIZE_SYSTEM_PROMPT)
     chat_prompt = ChatPromptTemplate.from_messages([system_message, human_message])
     return chat(chat_prompt.format_prompt(text=doc).to_messages())
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         if st.button("Submit", key=1):
 
             unique_val += 1
-            chat, chat_prompt = get_resp(SYSTEM_PROMPT, FOLLOW_UP_PROMPT)
+            chat, chat_prompt = get_resp(SUMMARIZE_SYSTEM_PROMPT, FOLLOW_UP_PROMPT)
             print("hello")
             follow = st.write(follow_up_question)
             print(follow)
