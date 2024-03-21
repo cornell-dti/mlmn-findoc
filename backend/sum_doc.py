@@ -29,12 +29,15 @@ def sum_doc(doc: str):
         temperature=0,
         model="gpt-3.5-turbo-0125",
         openai_api_key=os.getenv("OPENAI_API_KEY"),
+        streaming=True,
     )
-    print(os.getenv("OPENAI_API_KEY"))
-    human_message = HumanMessagePromptTemplate.from_template(SUMMARIZE_HUMAN_PROMPT)
-    system_message = SystemMessagePromptTemplate.from_template(SUMMARIZE_SYSTEM_PROMPT)
-    chat_prompt = ChatPromptTemplate.from_messages([system_message, human_message])
-    return chat(chat_prompt.format_prompt(text=doc).to_messages())
+
+    system_message = {"role": "system", "content": SUMMARIZE_SYSTEM_PROMPT}
+    human_message = {"role": "user", "content": SUMMARIZE_HUMAN_PROMPT.format(text=doc)}
+    prompt_messages = [system_message, human_message]
+
+    for response in chat.stream(prompt_messages):
+        yield response.content
 
 
 def get_resp(sys_prompt: str, hmn_prompt: str):
@@ -43,7 +46,6 @@ def get_resp(sys_prompt: str, hmn_prompt: str):
         model="gpt-3.5-turbo-0125",
         openai_api_key=os.getenv("OPENAI_API_KEY"),
     )
-    print(os.getenv("OPENAI_API_KEY"))
     human_message = HumanMessagePromptTemplate.from_template(hmn_prompt)
     system_message = SystemMessagePromptTemplate.from_template(sys_prompt)
     chat_prompt = ChatPromptTemplate.from_messages([system_message, human_message])
@@ -57,23 +59,28 @@ if __name__ == "__main__":
     if st.session_state.get("button") != True:
         st.session_state["button"] = button1
     if st.session_state["button"] == True:
-        ans = st.write(sum_doc(doc=doc).content)
+        st.write("Summarizing...")
+        st.session_state["button"] = False
+        st.write(sum_doc(doc))
 
-        unique_val = 1
-        follow_up_question = st.text_input("Enter a follow-up question")
-        new_ans = ans
+        if False:
+            ans = st.write(sum_doc(doc=doc).content)
 
-        if st.button("Submit", key=1):
+            unique_val = 1
+            follow_up_question = st.text_input("Enter a follow-up question")
+            new_ans = ans
 
-            unique_val += 1
-            chat, chat_prompt = get_resp(SUMMARIZE_SYSTEM_PROMPT, FOLLOW_UP_PROMPT)
-            print("hello")
-            follow = st.write(follow_up_question)
-            print(follow)
-            response = chat(
-                chat_prompt.format_prompt(
-                    prev_ans=new_ans, question=follow_up_question
-                ).to_messages()
-            ).content
+            if st.button("Submit", key=1):
 
-            new_ans = st.write(response)
+                unique_val += 1
+                chat, chat_prompt = get_resp(SUMMARIZE_SYSTEM_PROMPT, FOLLOW_UP_PROMPT)
+                print("hello")
+                follow = st.write(follow_up_question)
+                print(follow)
+                response = chat(
+                    chat_prompt.format_prompt(
+                        prev_ans=new_ans, question=follow_up_question
+                    ).to_messages()
+                ).content
+
+                new_ans = st.write(response)

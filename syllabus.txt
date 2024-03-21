@@ -1,0 +1,67 @@
+of ⁨6⁩
+
+Introduction to Analysis of Algorithms
+CS 4820/5820 Spring 2022 Syllabus
+General Information
+• Instructor: Eshan Chattopadhyay, Gates Hall 319, eshan@cs.cornell.edu.
+Oﬃce hours: Monday 10:30am-11:30am, Thursday 1:30pm-2:30pm.
+• Lectures: MWF 9:05am-9:55am, Uris Hall G01.
+Course Description
+This course develops techniques used in the design and analysis of algorithms, with an empha-
+sis on problems arising in computing applications. Example applications are drawn from sys-
+tems and networks, artiﬁcial intelligence, computer vision, data mining, and computational bi-
+ology. This course covers four major algorithm design techniques (greedy algorithms, divide and
+conquer, dynamic programming, and network ﬂow), computability theory focusing on undecid-
+ability, computational complexity focusing on NP-completeness, and algorithmic techniques for
+intractable problems, including identiﬁcation of structured special cases, approximation algo-
+rithms, and local search heuristics. This course continues to build on work in previous courses
+on proofwriting and asymptotic runtime analysis of algorithms.
+Learning Objectives
+On completing this course, students should be able to:
+• Identify problems solvable with a greedy algorithm, design and prove the correctness of
+such an algorithm, and supply asymptotic running time for a variety of given algorithms.
+• Recognize problems to which divide and conquer or dynamic programming approaches
+may apply, design algorithms with these approaches, and analyze their computational ef-
+ﬁciency;
+• Apply randomization to produce tractable algorithms for several speciﬁc computationally
+challenging problems;
+• Reduce resource management as well as partition problems to network ﬂow or cut prob-
+lems, implement correct strategies for ﬁnding optimal ﬂows/cuts, and understand the
+properties of these strategies;
+• Recognize whether or not certain problems are computationally intractible (e.g. NP-complete,
+uncomputable), and use reductions to known problems to prove intractability;
+1
+• Use approximation algorithms to eﬃciently produce near-optimal solutions for intractable
+problems, and bound how close these algorithms are to being optimal;
+• Use online algorithms to produce near-optimal solutions when only partial information
+about a problem is available, and bound how close these algorithms are to being optimal;
+and
+• Be able to recognize, implement, and understand the properties of several famous and im-
+portant algorithms including
+– Gale-Shapley method for stable matchings,
+– Prim’s and Kruskal’s algorithms for ﬁnding minimum spanning trees,
+– Bellman-Ford’s algorithm for ﬁnding shortest paths in a graph, and
+– Ford-Fulkerson’s algorithm for ﬁnding max ﬂows in networks.
+Course Material
+The textbook for the course is Algorithm Design by Jon Kleinberg and Eva Tardos (available at Cor-
+nell Store). Although this book was designed for this course, there will be topics covered in lecture
+that are not in the text and there will be topics in the text that are not covered in lecture. You
+are responsible for topics covered in lecture and for any assigned reading in the text.
+The following books are also useful references.
+• T. Cormen, C. Leiserson, R. Rivest. Introduction to Algorithms.
+• S. Dasgupta, C. Papadimitriou, and U. Vazirani. Algorithms.
+• A. Aho, J. Hopcroft, J. Ullman. The Design and Analysis of Computer Algorithms.
+• M. Garey and D. Johnson. Computers and Intractability.
+• D. Kozen. The Design and Analysis of Algorithms.
+Prerequisites
+The prerequisites for the course are, either having an A- or better in both CS 2800 and CS 2110,
+or having successfully completed all three of CS 2800, CS 2110, and CS 3110. We assume that
+everyone is familiar with the material in CS 2110, CS 3110, and CS 2800, and we will use it as nec-
+essary in CS 4820. This includes elementary data structures, probability (conditional probability,
+expectation, variance), sorting, and basic terminology involving graphs (including the concepts
+of depth-ﬁrst search and breadth-ﬁrst search), and coding (in Java, or one of the other languages
+supported – see Programming Assignment Instructions). Some of these are reviewed in the text.
+The lectures and homework involve the analysis of algorithms at a fairly mathematical level. A
+few of the homework exercises consist of writing code in Java. We expect everyone to be com-
+fortable reading and writing proofs at the level of CS 2800, as well as writing code in Java.
+2
