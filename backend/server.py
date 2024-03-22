@@ -55,9 +55,27 @@ def summarize():
 
 @server.route("/compare", methods=["GET", "POST"])
 def compare():
-    content1 = request.args.get("message1")
-    content2 = request.args.get("message2")
-    return compare_docs(content1, content2).content
+    if request.method == "POST":
+        if "file1" not in request.files or "file2" not in request.files:
+            return Response("No file part in the request", status=400)
+        file1 = request.files["file1"]
+        file2 = request.files["file2"]
+        if file1.filename == "" or file2.filename == "":
+            return Response("No selected file", status=400)
+        if (
+            file1
+            and werkzeug.utils.secure_filename(file1.filename)
+            and file2
+            and werkzeug.utils.secure_filename(file2.filename)
+        ):
+            content1 = file1.read().decode("utf-8")
+            content2 = file2.read().decode("utf-8")
+
+    def generate():
+        for response in compare_docs(content1, content2):
+            yield response
+
+    return Response(generate(), mimetype="text/event-stream")
 
 
 if __name__ == "__main__":

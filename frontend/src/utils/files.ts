@@ -1,6 +1,13 @@
-async function uploadFile(file: File, endpoint: string): Promise<Response> {
+async function uploadFile(file: File | File[], endpoint: string): Promise<Response> {
     const formData = new FormData();
-    formData.append("file", file);
+    if (file instanceof File) {
+        formData.append("file", file);
+    } else {
+        file.forEach((file, index) => {
+            formData.append(`file${index + 1}`, file);
+        });
+    }
+
     const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/${endpoint}`, {
         method: "POST",
         body: formData,
