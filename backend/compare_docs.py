@@ -1,11 +1,5 @@
-# use streamlit run sum_doc.py to run
 import os
 import streamlit as st
-from langchain.prompts.chat import (
-    ChatPromptTemplate,
-    HumanMessagePromptTemplate,
-    SystemMessagePromptTemplate,
-)
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv, find_dotenv
 
@@ -26,10 +20,16 @@ def compare_docs(doc1: str, doc2: str):
         model="gpt-3.5-turbo-0125",
         openai_api_key=os.getenv("YOUR_OPENAI_KEY"),
     )
-    human_message = HumanMessagePromptTemplate.from_template(COMPARE_HUMAN_PROMPT)
-    system_message = SystemMessagePromptTemplate.from_template(COMPARE_SYSTEM_PROMPT)
-    chat_prompt = ChatPromptTemplate.from_messages([system_message, human_message])
-    return chat(chat_prompt.format_prompt(text1=doc1, text2=doc2).to_messages())
+
+    system_message = {"role": "system", "content": COMPARE_SYSTEM_PROMPT}
+    human_message = {
+        "role": "user",
+        "content": COMPARE_HUMAN_PROMPT.format(text1=doc1, text2=doc2),
+    }
+    prompt_messages = [system_message, human_message]
+
+    for response in chat.stream(prompt_messages):
+        yield response.content
 
 
 if __name__ == "__main__":
