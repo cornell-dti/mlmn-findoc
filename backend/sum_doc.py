@@ -34,12 +34,13 @@ chat = ChatOpenAI(
 
 def sum_doc(doc: str):
     system_message = SystemMessagePromptTemplate.from_template(SUMMARIZE_SYSTEM_PROMPT)
-    human_message = HumanMessagePromptTemplate.from_template(SUMMARIZE_HUMAN_PROMPT.format(text=doc))
+    human_message = HumanMessagePromptTemplate.from_template(
+        SUMMARIZE_HUMAN_PROMPT.format(text=doc)
+    )
     chat_prompt = ChatPromptTemplate.from_messages([human_message, system_message])
     final_output = chat_prompt.format_prompt().to_messages()
     print(final_output)
-    return(final_output)
-
+    return final_output
 
 
 if __name__ == "__main__":
