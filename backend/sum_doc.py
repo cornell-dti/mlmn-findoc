@@ -18,38 +18,28 @@ SUMMARIZE_HUMAN_PROMPT = (
     "Summarize this fictional story briefly. Use complete sentences.:\n\n{text}"
 )
 SUMMARIZE_SYSTEM_PROMPT = "You are an AI designed to provide concise summaries. Focus on extracting key findings, implications, and any significant conclusions from the provided text, suitable for a general audience."
+SUMMARIZE_SYSTEM_PROMPT_SYLLABUS = "You are an AI designed to provide concise summaries of course syllabi for student use. Focus on extracting key findings, implications, and any significant conclusions from the provided text, suitable for a general audience."
+
 
 FOLLOW_UP_PROMPT = (
     "This was your previous answer: {prev_ans}. Follow up question: {question}"
 )
 
+chat = ChatOpenAI(
+    temperature=0,
+    model="gpt-3.5-turbo-0125",
+    openai_api_key=os.getenv("OPENAI_API_KEY"),
+)
+
 
 def sum_doc(doc: str):
-    chat = ChatOpenAI(
-        temperature=0,
-        model="gpt-3.5-turbo-0125",
-        openai_api_key=os.getenv("OPENAI_API_KEY"),
-        streaming=True,
-    )
+    system_message = SystemMessagePromptTemplate.from_template(SUMMARIZE_SYSTEM_PROMPT)
+    human_message = HumanMessagePromptTemplate.from_template(SUMMARIZE_HUMAN_PROMPT.format(text=doc))
+    chat_prompt = ChatPromptTemplate.from_messages([human_message, system_message])
+    final_output = chat_prompt.format_prompt().to_messages()
+    print(final_output)
+    return(final_output)
 
-    system_message = {"role": "system", "content": SUMMARIZE_SYSTEM_PROMPT}
-    human_message = {"role": "user", "content": SUMMARIZE_HUMAN_PROMPT.format(text=doc)}
-    prompt_messages = [system_message, human_message]
-
-    for response in chat.stream(prompt_messages):
-        yield response.content
-
-
-def get_resp(sys_prompt: str, hmn_prompt: str):
-    chat = ChatOpenAI(
-        temperature=0,
-        model="gpt-3.5-turbo-0125",
-        openai_api_key=os.getenv("OPENAI_API_KEY"),
-    )
-    human_message = HumanMessagePromptTemplate.from_template(hmn_prompt)
-    system_message = SystemMessagePromptTemplate.from_template(sys_prompt)
-    chat_prompt = ChatPromptTemplate.from_messages([system_message, human_message])
-    return chat, chat_prompt
 
 
 if __name__ == "__main__":
@@ -61,26 +51,9 @@ if __name__ == "__main__":
     if st.session_state["button"] == True:
         st.write("Summarizing...")
         st.session_state["button"] = False
-        st.write(sum_doc(doc))
 
-        if False:
-            ans = st.write(sum_doc(doc=doc).content)
+        ans = st.write(sum_doc(doc=doc))
 
-            unique_val = 1
-            follow_up_question = st.text_input("Enter a follow-up question")
-            new_ans = ans
-
-            if st.button("Submit", key=1):
-
-                unique_val += 1
-                chat, chat_prompt = get_resp(SUMMARIZE_SYSTEM_PROMPT, FOLLOW_UP_PROMPT)
-                print("hello")
-                follow = st.write(follow_up_question)
-                print(follow)
-                response = chat(
-                    chat_prompt.format_prompt(
-                        prev_ans=new_ans, question=follow_up_question
-                    ).to_messages()
-                ).content
-
-                new_ans = st.write(response)
+        unique_val = 1
+        follow_up_question = st.text_input("Enter a follow-up question")
+        new_ans = ans
