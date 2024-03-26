@@ -1,14 +1,7 @@
 from flask import Flask, request, jsonify, Response
-import os
-from langchain.prompts.chat import (
-    ChatPromptTemplate,
-    HumanMessagePromptTemplate,
-    SystemMessagePromptTemplate,
-)
-from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv, find_dotenv
 import werkzeug
-from sum_doc import sum_doc, get_resp
+from sum_doc import main
 from compare_docs import compare_docs
 from flask_cors import CORS
 
@@ -30,8 +23,8 @@ FOLLOW_UP_PROMPT = (
 
 
 @server.route("/")
-def testing():
-    return "hi"
+def index():
+    return jsonify("DTI GPT Server is running!"), 200
 
 
 @server.route("/summarize", methods=["GET", "POST"])
@@ -46,11 +39,7 @@ def summarize():
         if file and werkzeug.utils.secure_filename(file.filename):
             content = file.read().decode("utf-8")
 
-    def generate():
-        for response in sum_doc(content):
-            yield response
-
-    return Response(generate(), mimetype="text/event-stream")
+    return jsonify(main(content)), 200
 
 
 @server.route("/compare", methods=["GET", "POST"])

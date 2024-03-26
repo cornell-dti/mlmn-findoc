@@ -105,7 +105,14 @@ export default function Home() {
         {isProcessing && <p className="text-white">Processing...</p>}
         <div className="mt-6 w-full max-w-xl">
           <h2 className="text-lg text-white">Server Messages:</h2>
-          <div className="max-h-52 overflow-auto bg-white bg-opacity-10 p-4 text-white rounded">{messages.join("")}</div>
+          <div className="max-h-52 overflow-auto bg-white bg-opacity-10 p-4 text-white rounded">
+            {messages.map((message, index) => {
+              if (message === "\n\n\n") {
+                return <p key={index} className="mb-4" />;
+              }
+              return message;
+            })}
+          </div>
         </div>
       </div>
     </main>
