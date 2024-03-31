@@ -1,4 +1,5 @@
 # use streamlit run sum_doc.py to run
+import json
 import os
 import streamlit as st
 from langchain.prompts.chat import (
@@ -10,26 +11,11 @@ from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv, find_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable, Dict, Any
-
+from prompts import *
+from typing import Generator
 
 load_dotenv(find_dotenv(), override=True)
 
-
-QUERY_INSTRUCTIONS = "Enter any query document to summarize:"
-
-SUMMARIZE_HUMAN_PROMPT = (
-    "Summarize this fictional story briefly. Use complete sentences.:\n\n{text}"
-)
-SUMMARIZE_SYSTEM_PROMPT = "You are an AI designed to provide concise summaries. Focus on extracting key findings, implications, and any significant conclusions from the provided text, suitable for a general audience."
-SUMMARIZE_SYSTEM_PROMPT_SYLLABUS = "You are an AI designed to provide concise summaries of course syllabi for student use. Focus on the information that the user asks you to provide."
-SUMMARIZE_HUMAN_PROMPT_SYLLABUS = (
-    "Summarize this course syllabus briefly. Use complete sentences.:\n\n{text}"
-)
-RELEVANT_DATES_HUMAN_PROMPT = "Provide all the relevant dates mentioned in the document, including exam dates, assignment dates, and any other important deadlines. Provide the exact dates. If the syllabus mentions the frequency of exams or assignments, provide the specific dates for the all the exams and assignments. Given that the semester starts on January 24, 2024, and ends on May 18th, 2024 provide the dates for all the exams and assignments.:\n\n{text}"
-
-FOLLOW_UP_PROMPT = (
-    "This was your previous answer: {prev_ans}. Follow up question: {question}"
-)
 
 chat = ChatOpenAI(
     temperature=0,
@@ -38,47 +24,64 @@ chat = ChatOpenAI(
 )
 
 
-def sum_doc(doc: str):
-    system_message = SystemMessagePromptTemplate.from_template(
-        SUMMARIZE_SYSTEM_PROMPT_SYLLABUS
-    )
+def do_task(doc: str, system_prompt, human_prompt):
+    system_message = SystemMessagePromptTemplate.from_template(system_prompt)
     human_message = HumanMessagePromptTemplate.from_template(
-        SUMMARIZE_HUMAN_PROMPT.format(text=doc)
+        human_prompt.format(text=doc)
     )
     chat_prompt = ChatPromptTemplate.from_messages([human_message, system_message])
     final_output = chat.invoke(chat_prompt.format_prompt().to_messages())
     return final_output.content
+
+
+def sum_doc(doc: str):
+    return do_task(doc, SUMMARIZE_SYSTEM_PROMPT_SYLLABUS, SUMMARIZE_HUMAN_PROMPT)
 
 
 def get_dates(doc: str):
-    system_message = SystemMessagePromptTemplate.from_template(
-        SUMMARIZE_SYSTEM_PROMPT_SYLLABUS
-    )
-    human_message = HumanMessagePromptTemplate.from_template(
-        RELEVANT_DATES_HUMAN_PROMPT.format(text=doc)
-    )
-    chat_prompt = ChatPromptTemplate.from_messages([human_message, system_message])
-    final_output = chat.invoke(chat_prompt.format_prompt().to_messages())
-    return final_output.content
+    return do_task(doc, BACKEND_DATES_SYSTEM_PROMPT, BACKEND_DATES_HUMAN_PROMPT)
 
 
-def main(doc: str) -> Dict[str, Any]:
-    response = {}
-    tasks = [sum_doc, get_dates]
+def get_policies(doc: str):
+    return do_task(doc, POLICIES_SYSTEM_PROMPT, POLICIES_HUMAN_PROMPT)
 
-    with ThreadPoolExecutor(max_workers=len(tasks)) as executor:
-        future_to_func = {executor.submit(task, doc): task.__name__ for task in tasks}
+
+def get_resources(doc: str):
+    return do_task(doc, RESOURCES_SYSTEM_PROMPT, RESOURCES_HUMAN_PROMPT)
+
+
+def get_instructors(doc: str):
+    return do_task(doc, INSTRUCTOR_SYSTEM_PROMPT, INSTRUCTOR_HUMAN_PROMPT)
+
+
+def main(doc: str, tasks: dict) -> Generator[Any, Any, Any]:
+    options_to_tasks = {
+        "summary": sum_doc,
+        "dates": get_dates,
+        "policies": get_policies,
+        "resources": get_resources,
+        "instructors": get_instructors,
+    }
+
+    jobs = []
+    for task_name in tasks:
+        if tasks[task_name]:
+            jobs.append(options_to_tasks[task_name])
+
+    with ThreadPoolExecutor(max_workers=len(jobs)) as executor:
+        future_to_func = {executor.submit(job, doc): job.__name__ for job in jobs}
 
         for future in as_completed(future_to_func):
             func_name = future_to_func[future]
             try:
                 result = future.result()
+                response_dict = dict()
+                response_dict[func_name] = result
+                yield json.dumps(response_dict)
             except Exception as exc:
                 print(f"{func_name} generated an exception: {exc}")
             else:
-                response[func_name] = result
-
-    return response
+                print(f"{func_name} completed successfully")
 
 
 def streamlit():
