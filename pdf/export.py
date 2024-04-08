@@ -1,60 +1,64 @@
 import json
 import os
-from pdfdocument.document import PDFDocument
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
-def extract_values(obj, values, indent_level):
+def get_indented_style(style, indent_level, additional_indent=0):
+    left_indent = (indent_level * 12) + additional_indent
+    return ParagraphStyle(
+        f'IndentedStyle{indent_level}_{additional_indent}', 
+        parent=style, 
+        firstLineIndent=0,
+        leftIndent=left_indent,
+        spaceBefore=0,
+        spaceAfter=0,
+    )
+
+def extract_values(obj, text, style, indent_level=0):
     if isinstance(obj, dict):
-        for key, value in obj.items():
-            if isinstance(value, (int, float, str)):
-                values.append(f"{' ' * indent_level}{key}: {value}")
+        for index, (key, value) in enumerate(obj.items()):
+            key_str = f"<b>{key}:</b>"
+            additional_indent = 4 if index == 1 else 0
+            current_style = get_indented_style(style, indent_level, additional_indent=additional_indent)
+            if isinstance(value, (dict, list)):
+                text.append(Paragraph(key_str, current_style))
+                extract_values(value, text, style, indent_level + 1)
             else:
-                values.append(f"{' ' * indent_level}{key}:")
-                extract_values(value, values, indent_level + 1)
+                text.append(Paragraph(f"{key_str} {value}", current_style))
     elif isinstance(obj, list):
         for item in obj:
-            extract_values(item, values, indent_level)
+            if isinstance(item, (dict, list)):
+                extract_values(item, text, style, indent_level)
+            else:
+                current_style = get_indented_style(style, indent_level)
+                text.append(Paragraph(str(item), current_style))
     else:
-        values.append(f"{' ' * indent_level}{obj}")
+        current_style = get_indented_style(style, indent_level)
+        text.append(Paragraph(str(obj), current_style))
 
-
-def get_values(json_data, indent_level=0):
-    values = []
-    extract_values(json_data, values, indent_level)
-    return values
-
-
-def prepending_spaces(s):
-    count = 0
-    for char in s:
-        if char == ' ':
-            count += 1
-        else:
-            break
-    return count
-
+styles = getSampleStyleSheet()
+preformatted_style = ParagraphStyle(
+    'Preformatted', 
+    parent=styles['Code'], 
+    fontName='Times-Roman',
+    fontSize=10,
+    leading=12
+)
 
 def json_to_pdf(json_file, output_path):
-    pdf = PDFDocument(output_path)
-    pdf.init_report()
-
-    # Get json data
+    #Load JSON data
     with open('json_output/'+json_file, 'r') as file:
-        data = json.load(file)
-    
-    # Save data as strings (nested data have spaces prepended to indicate
-    # they need indentation)
-    json_values = get_values(data)
-    
-    # Write the values to the PDF document, indenting where appropriate
-    for value in json_values:
-        if prepending_spaces(value) > 0:
-            # TODO: indent multiple times based on number of prepending spaces
-            pdf.p(value, style=pdf.style.indented)
-        else:
-            pdf.p(value)
-    
-    pdf.generate()
+        json_data = json.load(file)
 
+    #Create SimpleDocTemplate object with given output path and page size
+    doc = SimpleDocTemplate(output_path, pagesize=letter)
+    text = []
+
+    #Build pdf page with content from the JSON data
+    extract_values(json_data, text, preformatted_style)
+    doc.build(text)
 
 # Get all json files and export them to PDFs
 directory = "../pdf/json_output"
