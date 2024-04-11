@@ -78,7 +78,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           sidebarOpen ? "ml-64" : "ml-0"
         }`}
       >
-        <main className="h-screen">{children}</main>
+        <main className="min-h-screen" style={{ backgroundColor: '#231f1e' }}>{children}</main>
       </div>
     </div>
   );
