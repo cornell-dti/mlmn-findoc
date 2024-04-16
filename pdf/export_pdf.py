@@ -19,7 +19,8 @@ def get_indented_style(style, indent_level, additional_indent=0):
 def extract_values(obj, text, style, indent_level=0):
     if isinstance(obj, dict):
         for index, (key, value) in enumerate(obj.items()):
-            key_str = f"<b>{key}:</b>"
+            format_key = key.replace("_", " ")
+            key_str = f"<b>{format_key[0].upper() + format_key[1:]}:</b>"
             additional_indent = 4 if index == 1 else 0
             current_style = get_indented_style(style, indent_level, additional_indent=additional_indent)
             if isinstance(value, (dict, list)):
