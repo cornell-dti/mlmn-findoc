@@ -25,6 +25,7 @@ def embed_from_text(text: str):
 
 def process_query(doc: str, query: str):
     doc_embedding = embeddings.embed_query(text=doc)
+    query_embedding = embeddings.embed_query(text=query)
     closest_doc = client.search(
         "DocumentCollection",
         data=[doc_embedding],
@@ -32,8 +33,21 @@ def process_query(doc: str, query: str):
     )
     if closest_doc[0][0]["distance"] >= 0.99:
         doc_id = closest_doc[0][0]["id"]
+        print(doc_id)
+        closest_query = client.search(
+            "QuestionAnswerCollection",
+            data=[query_embedding],
+            limit=1,
+            output_fields=["answer"],
+            filter=f"documentId == {doc_id}",
+        )
+        if closest_query[0][0]["distance"] >= 0.85:
+            return closest_query[0][0]["entity"]["answer"]
+        else:
+            return "Query not found"
     else:
         client.insert("DocumentCollection", data={"documentVector": doc_embedding})
+        return "Document not found"
 
 
 test_data = "some silly question"
@@ -263,4 +277,17 @@ otherwise, are intellectual property belonging to the author/instructor. Student
 ited from posting, buying or selling any course materials without the express permission of the
 instructor.
 """
-process_query(syllabus, "")
+# syllabus_vec = embeddings.embed_query(syllabus)
+# client.insert("DocumentCollection", data={"documentVector": syllabus_vec})
+
+# q = embeddings.embed_query("What is the name of this course?")
+# client.insert(
+#     "QuestionAnswerCollection",
+#     data={
+#         "questionVector": q,
+#         "answer": "Discrete Structures",
+#         "documentId": 448985163764207963,
+#         "timestamp": 1,
+#     },
+# )
+print(process_query(syllabus, "What is the name of this course?"))
