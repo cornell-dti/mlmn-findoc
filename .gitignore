@@ -36,3 +36,7 @@ __pycache__
 *.pyc
 venv
 env
+
+# gcal integration
+credentials.json
+token.pickle
