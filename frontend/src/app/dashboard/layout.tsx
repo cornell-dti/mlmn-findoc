@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
-import SessionWrapper from "@/components/SessionWrapper";
+import DTIGPTLayout from "@/components/DTIGPTLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,10 +16,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <SessionWrapper>
-      <html lang="en">
-        <body className={inter.className}>{children}</body>
-      </html>
-    </SessionWrapper>
+    <html lang="en">
+      <body className={inter.className}>
+        <DTIGPTLayout>{children}</DTIGPTLayout>
+      </body>
+    </html>
   );
 }
