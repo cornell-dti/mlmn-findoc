@@ -8,6 +8,7 @@ import DialogContent from "@mui/material/DialogContent";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseIcon from "@mui/icons-material/Close";
 import { DialogTitle, IconButton } from "@mui/material";
+import { getSession } from "next-auth/react";
 
 const summary_options = ["policies", "dates", "summary", "resources", "instructors"];
 const kpi_options = ["course_instructors", "office_hours", "lectures", "description", "learning_objectives", "prerequisites"];
@@ -43,6 +44,7 @@ export default function Home() {
   const [secondFileName, setSecondFileName] = useState<string>("");
   const [firstFile, setFirstFile] = useState<File | null>(null);
   const [firstFileContent, setFirstFileContent] = useState("");
+  const [userEmail, setUserEmail] = useState<string>("");
   const [highlightedContent, setHighlightedContent] = useState([]);
   const [highlightPattern, setHighlightPattern] = useState<RegExp | null>(null);
 
@@ -85,15 +87,21 @@ export default function Home() {
   };
 
   const onExportClick = async () => {
-    const dates = messages["dates"];
+    const dates = JSON.parse(messages["dates"]);
     await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/export`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: dates,
+      body: JSON.stringify({ ...dates, user_email: userEmail }),
     });
   };
+
+  useEffect(() => {
+    getSession().then((session) => {
+      setUserEmail(session?.user?.email!);
+    });
+  }, []);
 
   useEffect(() => {
     const pattern = createHighlightPattern(kpiHighlightMapping, kpi_options);

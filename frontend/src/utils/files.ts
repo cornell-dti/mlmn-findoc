@@ -56,7 +56,6 @@ function processDatesResponse(content: string, setMessages: React.Dispatch<React
     }));
     const dates = JSON.parse(content);
     let markdown = "## Events\n\n";
-    console.log(dates);
 
     for (let event of dates.events) {
         markdown += `### ${event.summary}\n\n`;

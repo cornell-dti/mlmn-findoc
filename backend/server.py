@@ -70,23 +70,23 @@ def compare():
 def export_to_gcal():
     data = request.get_json()
     events = data.get("events", [])
+    user_email = data.get("user_email", None)
     for event in events:
         try:
             add_event_to_calendar(
                 summary=event["summary"],
                 start_datetime=datetime.strptime(
-                    # event["start_datetime"], "%Y-%m-%dT%H:%M:%S.%f%z"
                     event["start_datetime"],
                     "%Y-%m-%dT%H:%M:%S",
                 ),
                 end_datetime=datetime.strptime(
-                    # event["end_datetime"], "%Y-%m-%dT%H:%M:%S.%f%z"
                     event["end_datetime"],
                     "%Y-%m-%dT%H:%M:%S",
                 ),
                 description=event.get("description", ""),
                 location=event.get("location", ""),
                 email_reminder_minutes=event.get("email_reminder_minutes", None),
+                user_email=user_email,
             )
         except Exception as e:
             print("Error in exporting to Google Calendar before: ", e)
