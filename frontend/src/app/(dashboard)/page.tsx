@@ -2,6 +2,7 @@
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { uploadFile, processResponse } from "@/utils/files";
+import { areCredentialsValid } from "@/utils/auth";
 import FormattedMessage from "@/components/ResponseFormat";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -51,9 +52,9 @@ const Home: React.FC<HomeProps> = (props) => {
   const [userEmail, setUserEmail] = useState<string>("");
   const [highlightedContent, setHighlightedContent] = useState([]);
   const [highlightPattern, setHighlightPattern] = useState<RegExp | null>(null);
-  const isSummarize = props.function === "summarize"
-  const isParse = props.function === "parse"
-  const isCompare = props.function === "compare"
+  const isSummarize = props.function === "summarize";
+  const isParse = props.function === "parse";
+  const isCompare = props.function === "compare";
 
   const options_to_use = summary_options.reduce((acc: any, option) => {
     acc[option] = true;
@@ -93,15 +94,35 @@ const Home: React.FC<HomeProps> = (props) => {
     });
   };
 
+  window.addEventListener(
+    "message",
+    (event) => {
+      if (event.origin !== "http://localhost:8080") return;
+
+      if (event.data.type === "authentication") {
+        console.log("Received credentials:", event.data.data);
+        localStorage.setItem("gCalCreds", JSON.stringify(event.data.data));
+      }
+    },
+    false
+  );
+
   const onExportClick = async () => {
     const dates = JSON.parse(messages["dates"]);
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/export`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...dates, user_email: userEmail }),
-    });
+    const credentials = JSON.parse(localStorage.getItem("gCalCreds")!);
+    console.log("credentials:", credentials);
+    if (!credentials || !areCredentialsValid(credentials)) {
+      window.open(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth`, "_blank");
+    } else {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/export`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ dates, credentials, userEmail }),
+      });
+      console.log("Export response:", await response.json());
+    }
   };
 
   useEffect(() => {
@@ -185,25 +206,27 @@ const Home: React.FC<HomeProps> = (props) => {
           {isCompare ? "What do you want to compare?" : ""}
         </h1>
 
-        {isParse ? <div className="flex items-center gap-2 text-white" style={{ marginBottom: '20px' }}>
-          {summary_options.map((option, index) => (
-            <div key={index} className="flex items-center gap-1">
-              <input
-                type="checkbox"
-                id={option}
-                name={option}
-                checked={options[option]}
-                onChange={() => handleOptionChange(option)}
-                className="form-checkbox h-5 w-5 text-blue-600"
-              />
-              <label htmlFor={option} className="text-sm">
-                {option}
-              </label>
-            </div>
-          ))}
-        </div>
-        : ""
-        }
+        {isParse ? (
+          <div className="flex items-center gap-2 text-white" style={{ marginBottom: "20px" }}>
+            {summary_options.map((option, index) => (
+              <div key={index} className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  id={option}
+                  name={option}
+                  checked={options[option]}
+                  onChange={() => handleOptionChange(option)}
+                  className="form-checkbox h-5 w-5 text-blue-600"
+                />
+                <label htmlFor={option} className="text-sm">
+                  {option}
+                </label>
+              </div>
+            ))}
+          </div>
+        ) : (
+          ""
+        )}
 
         <div className="flex w-full justify-center gap-4 mb-4">
           <div
@@ -230,9 +253,11 @@ const Home: React.FC<HomeProps> = (props) => {
             <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
           </div>
 
-          {isSummarize ? 
+          {isSummarize ? (
             <>
-              <div className="text-white" style={{ marginTop: '65px' }}>or</div> 
+              <div className="text-white" style={{ marginTop: "65px" }}>
+                or
+              </div>
               <div
                 className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
                   isProcessing ? "bg-gray-200" : "bg-transparent"
@@ -257,7 +282,9 @@ const Home: React.FC<HomeProps> = (props) => {
                 <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
               </div>
             </>
-          : ""}
+          ) : (
+            ""
+          )}
 
           {uploadedFileName && (
             <div
@@ -395,6 +422,6 @@ const Home: React.FC<HomeProps> = (props) => {
       )}
     </main>
   );
-}
+};
 
 export default Home;
