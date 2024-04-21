@@ -11,17 +11,10 @@ from milvus_abstraction import (
     get_closest_distance,
 )
 
-
-CLUSTER_ENDPOINT = "https://in03-841f674328869e6.api.gcp-us-west1.zillizcloud.com"  # Set your cluster endpoint
-TOKEN = "7ac7f603b5c904ec69967d5bd1386eb958ba271c7aee24d867ab53fce126890ad7d3496a33597afd32db4459d050853da2c5494e"  # Set your token
-
-# Initialize a MilvusClient instance
-# Replace uri and token with your own
 client = MilvusClient(
-    uri=CLUSTER_ENDPOINT,  # Cluster endpoint obtained from the console
-    token=TOKEN,  # API key or a colon-separated cluster username and password
+    uri=os.getenv("MILVUS_CLUSTER_ENDPOINT"), 
+    token=os.getenv("MILVUS_TOKEN"),  
 )
-
 
 def process_query(doc: str, query: str):
     print(query)
