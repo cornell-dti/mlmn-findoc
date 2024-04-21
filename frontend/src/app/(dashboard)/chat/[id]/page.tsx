@@ -1,4 +1,4 @@
-import Home from "@/app/page";
+import Home from "../../page";
 
 export default function Page({ params }: { params: { id: string } }) {
   return (
