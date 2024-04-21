@@ -1,4 +1,5 @@
 # use streamlit run sum_doc.py to run
+import json
 import os
 import streamlit as st
 from langchain.prompts.chat import (
@@ -8,51 +9,82 @@ from langchain.prompts.chat import (
 )
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv, find_dotenv
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Callable, Dict, Any
+from prompts import *
+from typing import Generator
 
 load_dotenv(find_dotenv(), override=True)
 
 
-QUERY_INSTRUCTIONS = "Enter any query document to summarize:"
-
-SUMMARIZE_HUMAN_PROMPT = (
-    "Summarize this fictional story briefly. Use complete sentences.:\n\n{text}"
+chat = ChatOpenAI(
+    temperature=0,
+    model="gpt-3.5-turbo-0125",
+    openai_api_key=os.getenv("OPENAI_API_KEY"),
 )
-SUMMARIZE_SYSTEM_PROMPT = "You are an AI designed to provide concise summaries. Focus on extracting key findings, implications, and any significant conclusions from the provided text, suitable for a general audience."
 
-FOLLOW_UP_PROMPT = (
-    "This was your previous answer: {prev_ans}. Follow up question: {question}"
-)
+
+def do_task(doc: str, system_prompt, human_prompt):
+    system_message = SystemMessagePromptTemplate.from_template(system_prompt)
+    human_message = HumanMessagePromptTemplate.from_template(
+        human_prompt.format(text=doc)
+    )
+    chat_prompt = ChatPromptTemplate.from_messages([human_message, system_message])
+    final_output = chat.invoke(chat_prompt.format_prompt().to_messages())
+    return final_output.content
 
 
 def sum_doc(doc: str):
-    chat = ChatOpenAI(
-        temperature=0,
-        model="gpt-3.5-turbo-0125",
-        openai_api_key=os.getenv("OPENAI_API_KEY"),
-        streaming=True,
-    )
-
-    system_message = {"role": "system", "content": SUMMARIZE_SYSTEM_PROMPT}
-    human_message = {"role": "user", "content": SUMMARIZE_HUMAN_PROMPT.format(text=doc)}
-    prompt_messages = [system_message, human_message]
-
-    for response in chat.stream(prompt_messages):
-        yield response.content
+    return do_task(doc, SUMMARIZE_SYSTEM_PROMPT_SYLLABUS, SUMMARIZE_HUMAN_PROMPT)
 
 
-def get_resp(sys_prompt: str, hmn_prompt: str):
-    chat = ChatOpenAI(
-        temperature=0,
-        model="gpt-3.5-turbo-0125",
-        openai_api_key=os.getenv("OPENAI_API_KEY"),
-    )
-    human_message = HumanMessagePromptTemplate.from_template(hmn_prompt)
-    system_message = SystemMessagePromptTemplate.from_template(sys_prompt)
-    chat_prompt = ChatPromptTemplate.from_messages([system_message, human_message])
-    return chat, chat_prompt
+def get_dates(doc: str):
+    return do_task(doc, BACKEND_DATES_SYSTEM_PROMPT, BACKEND_DATES_HUMAN_PROMPT)
 
 
-if __name__ == "__main__":
+def get_policies(doc: str):
+    return do_task(doc, POLICIES_SYSTEM_PROMPT, POLICIES_HUMAN_PROMPT)
+
+
+def get_resources(doc: str):
+    return do_task(doc, RESOURCES_SYSTEM_PROMPT, RESOURCES_HUMAN_PROMPT)
+
+
+def get_instructors(doc: str):
+    return do_task(doc, INSTRUCTOR_SYSTEM_PROMPT, INSTRUCTOR_HUMAN_PROMPT)
+
+
+def main(doc: str, tasks: dict) -> Generator[Any, Any, Any]:
+    options_to_tasks = {
+        "summary": sum_doc,
+        "dates": get_dates,
+        "policies": get_policies,
+        "resources": get_resources,
+        "instructors": get_instructors,
+    }
+
+    jobs = []
+    for task_name in tasks:
+        if tasks[task_name]:
+            jobs.append(options_to_tasks[task_name])
+
+    with ThreadPoolExecutor(max_workers=len(jobs)) as executor:
+        future_to_func = {executor.submit(job, doc): job.__name__ for job in jobs}
+
+        for future in as_completed(future_to_func):
+            func_name = future_to_func[future]
+            try:
+                result = future.result()
+                response_dict = dict()
+                response_dict[func_name] = result
+                yield json.dumps(response_dict)
+            except Exception as exc:
+                print(f"{func_name} generated an exception: {exc}")
+            else:
+                print(f"{func_name} completed successfully")
+
+
+def streamlit():
     st.title("Document Summarizer")
     doc = st.text_area(QUERY_INSTRUCTIONS, height=100)
     button1 = st.button("Submit", key=0)
@@ -61,26 +93,8 @@ if __name__ == "__main__":
     if st.session_state["button"] == True:
         st.write("Summarizing...")
         st.session_state["button"] = False
-        st.write(sum_doc(doc))
+        st.write(sum_doc(doc=doc))
 
-        if False:
-            ans = st.write(sum_doc(doc=doc).content)
 
-            unique_val = 1
-            follow_up_question = st.text_input("Enter a follow-up question")
-            new_ans = ans
-
-            if st.button("Submit", key=1):
-
-                unique_val += 1
-                chat, chat_prompt = get_resp(SUMMARIZE_SYSTEM_PROMPT, FOLLOW_UP_PROMPT)
-                print("hello")
-                follow = st.write(follow_up_question)
-                print(follow)
-                response = chat(
-                    chat_prompt.format_prompt(
-                        prev_ans=new_ans, question=follow_up_question
-                    ).to_messages()
-                ).content
-
-                new_ans = st.write(response)
+if __name__ == "__main__":
+    streamlit()

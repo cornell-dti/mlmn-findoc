@@ -5,3 +5,5 @@ export type Page = {
   description: string;
   icon: string;
 };
+
+export type Content = { [key: string]: string };
