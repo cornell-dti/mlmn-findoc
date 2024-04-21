@@ -9,6 +9,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const dummyHistory : string[] = [];
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -39,6 +40,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
         <nav className="flex flex-col p-4">
+          <div className={"text-white"}>File History</div>
+          {dummyHistory.map((history) => "")}
+          <div className={"text-white"}>Function</div>
           {pages.map((page) => (
             <div key={page.index} className="mt-2 flex items-center relative">
               {pathname === page.route && (
