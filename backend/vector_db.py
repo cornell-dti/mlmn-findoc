@@ -3,10 +3,14 @@ from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv, find_dotenv
 import os
 
-load_dotenv(find_dotenv(), override=True)
+from milvus_abstraction import (
+    DocumentSchema,
+    QuestionSchema,
+    MilvusInteraction,
+    embed_from_text,
+    get_closest_distance,
+)
 
-OPENAI_API_KEY = os.getenv("YOUR_OPENAI_KEY")
-embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 
 CLUSTER_ENDPOINT = "https://in03-841f674328869e6.api.gcp-us-west1.zillizcloud.com"  # Set your cluster endpoint
 TOKEN = "7ac7f603b5c904ec69967d5bd1386eb958ba271c7aee24d867ab53fce126890ad7d3496a33597afd32db4459d050853da2c5494e"  # Set your token
@@ -19,40 +23,28 @@ client = MilvusClient(
 )
 
 
-def embed_from_text(text: str):
-    embeddings.embed_query(text=text)
-
-
 def process_query(doc: str, query: str):
-    doc_embedding = embeddings.embed_query(text=doc)
-    query_embedding = embeddings.embed_query(text=query)
-    closest_doc = client.search(
-        "DocumentCollection",
-        data=[doc_embedding],
-        limit=1,
-    )
-    if closest_doc[0][0]["distance"] >= 0.99:
+    print(query)
+    closest_doc = MilvusInteraction(
+        client=client, collectionName="DocumentCollection"
+    ).search(text=doc)
+    closest_doc_dist = get_closest_distance(closest_doc)
+    print(f"closest doc distance: {closest_doc_dist}")
+    if closest_doc_dist >= 0.99:
         doc_id = closest_doc[0][0]["id"]
         print(doc_id)
-        closest_query = client.search(
-            "QuestionAnswerCollection",
-            data=[query_embedding],
-            limit=1,
-            output_fields=["answer"],
-            filter=f"documentId == {doc_id}",
-        )
-        if closest_query[0][0]["distance"] >= 0.85:
+        closest_query = MilvusInteraction(
+            client=client, collectionName="QuestionAnswerCollection"
+        ).search(text=query, output_fields=["answer"], filter=f"documentId == {doc_id}")
+        closest_query_dist = get_closest_distance(closest_query)
+        print(f"closest query distance: {closest_query_dist}")
+        if closest_query_dist >= 0.75:
             return closest_query[0][0]["entity"]["answer"]
         else:
-            return "Query not found"
+            raise Exception("Query not found")
     else:
-        client.insert("DocumentCollection", data={"documentVector": doc_embedding})
-        return "Document not found"
+        raise Exception("Document not found")
 
-
-test_data = "some silly question"
-test_data_vec = embeddings.embed_query(test_data)
-test_data_dict = {"documentVector": test_data_vec}
 
 # client.delete("DocumentCollection", ids=0)
 # client.insert("DocumentCollection", data=test_data_dict)
@@ -277,17 +269,22 @@ otherwise, are intellectual property belonging to the author/instructor. Student
 ited from posting, buying or selling any course materials without the express permission of the
 instructor.
 """
-# syllabus_vec = embeddings.embed_query(syllabus)
-# client.insert("DocumentCollection", data={"documentVector": syllabus_vec})
 
-# q = embeddings.embed_query("What is the name of this course?")
+# syllabus_vec = embed_from_text(syllabus)
 # client.insert(
-#     "QuestionAnswerCollection",
-#     data={
-#         "questionVector": q,
-#         "answer": "Discrete Structures",
-#         "documentId": 448985163764207963,
-#         "timestamp": 1,
-#     },
+#     "DocumentCollection",
+#     data={"documentVector": syllabus_vec, "documentText": syllabus},
 # )
-print(process_query(syllabus, "What is the name of this course?"))
+
+q = embed_from_text("What class is this for?")
+client.insert(
+    "QuestionAnswerCollection",
+    data={
+        "questionVector": q,
+        "answer": "Discrete Structures",
+        "documentId": 448985163764207963,
+        "timestamp": 1,
+    },
+)
+
+# print(process_query(syllabus, "What semester is this syllabus from?"))
