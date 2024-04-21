@@ -13,6 +13,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable, Dict, Any
 from prompts import *
 from typing import Generator
+from vector_db import process_query, insert_doc, insert_qa
+from sample_files.syllabi import CS_2110, CS_2800_SP22
 
 load_dotenv(find_dotenv(), override=True)
 
@@ -25,12 +27,30 @@ chat = ChatOpenAI(
 
 
 def do_task(doc: str, system_prompt, human_prompt):
-    system_message = SystemMessagePromptTemplate.from_template(system_prompt)
-    human_message = HumanMessagePromptTemplate.from_template(
-        human_prompt.format(text=doc)
-    )
-    chat_prompt = ChatPromptTemplate.from_messages([human_message, system_message])
-    final_output = chat.invoke(chat_prompt.format_prompt().to_messages())
+    try:
+        return process_query(doc=doc, query=human_prompt.format(text=doc))
+    except Exception as e:
+        system_message = SystemMessagePromptTemplate.from_template(system_prompt)
+        human_message = HumanMessagePromptTemplate.from_template(
+            human_prompt.format(text=doc)
+        )
+        chat_prompt = ChatPromptTemplate.from_messages([human_message, system_message])
+        final_output = chat.invoke(chat_prompt.format_prompt().to_messages())
+        print(e)
+        if len(e.args) > 1:
+            _, doc_id = e.args
+            insert_qa(
+                query=human_prompt.format(text=doc),
+                answer=final_output.content,
+                documentId=doc_id,
+            )
+        else:
+            doc_id = insert_doc(doc=doc)
+            insert_qa(
+                query=human_prompt.format(text=doc),
+                answer=final_output.content,
+                documentId=doc_id,
+            )
     return final_output.content
 
 
@@ -97,4 +117,7 @@ def streamlit():
 
 
 if __name__ == "__main__":
-    streamlit()
+    print(
+        do_task(CS_2800_SP22, BACKEND_DATES_SYSTEM_PROMPT, BACKEND_DATES_HUMAN_PROMPT)
+    )
+    # streamlit()
