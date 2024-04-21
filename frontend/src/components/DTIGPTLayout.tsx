@@ -40,7 +40,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
         <nav className="flex flex-col p-4">
-          <div className={"text-white"}>History</div>
+          <div className={"text-white"}>File History</div>
           {dummyHistory.map((history) => "")}
           <div className={"text-white"}>Function</div>
           {pages.map((page) => (

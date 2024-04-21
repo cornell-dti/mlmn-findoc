@@ -51,6 +51,9 @@ const Home: React.FC<HomeProps> = (props) => {
   const [userEmail, setUserEmail] = useState<string>("");
   const [highlightedContent, setHighlightedContent] = useState([]);
   const [highlightPattern, setHighlightPattern] = useState<RegExp | null>(null);
+  const isSummarize = props.function === "summarize"
+  const isParse = props.function === "parse"
+  const isCompare = props.function === "compare"
 
   const options_to_use = summary_options.reduce((acc: any, option) => {
     acc[option] = true;
@@ -177,10 +180,31 @@ const Home: React.FC<HomeProps> = (props) => {
     <main className="flex flex-col items-center justify-between p-8">
       <div className="flex flex-col items-center justify-center h-full pt-2">
         <h1 className="text-4xl text-white mb-6">
-          {props.function === "summarize" ? "What do you want to summarize?" : ""}
-          {props.function === "parse" ? "What do you want to parse?" : ""}
-          {props.function === "compare" ? "What do you want to compare?" : ""}
+          {isSummarize ? "What do you want to summarize?" : ""}
+          {isParse ? "What do you want to parse?" : ""}
+          {isCompare ? "What do you want to compare?" : ""}
         </h1>
+
+        {isParse ? <div className="flex items-center gap-2 text-white" style={{ marginBottom: '20px' }}>
+          {summary_options.map((option, index) => (
+            <div key={index} className="flex items-center gap-1">
+              <input
+                type="checkbox"
+                id={option}
+                name={option}
+                checked={options[option]}
+                onChange={() => handleOptionChange(option)}
+                className="form-checkbox h-5 w-5 text-blue-600"
+              />
+              <label htmlFor={option} className="text-sm">
+                {option}
+              </label>
+            </div>
+          ))}
+        </div>
+        : ""
+        }
+
         <div className="flex w-full justify-center gap-4 mb-4">
           <div
             className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
@@ -205,7 +229,30 @@ const Home: React.FC<HomeProps> = (props) => {
             </label>
             <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
           </div>
-
+          <div className="text-white" style={{ marginTop: '65px' }}>or</div> 
+          <div
+            className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
+              isProcessing ? "bg-gray-200" : "bg-transparent"
+            } max-w-sm`}
+          >
+            <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
+              <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
+                <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
+                {uploadedFileName ? (
+                  <span className="text-sm text-blue-500">{uploadedFileName}</span>
+                ) : (
+                  <label className="text-sm -mb-2">Upload first file</label>
+                )}
+              </div>
+              {!uploadedFileName && (
+                <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
+                  Drag and drop <br />
+                  or choose a file to upload
+                </span>
+              )}
+            </label>
+            <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
+          </div>
           {uploadedFileName && (
             <div
               className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 bg-transparent ${
@@ -231,24 +278,6 @@ const Home: React.FC<HomeProps> = (props) => {
               <input id="second-file-upload" type="file" accept=".txt" className="hidden" onChange={handleSecondFileUpload} />
             </div>
           )}
-        </div>
-
-        <div className="flex items-center gap-2 text-white">
-          {summary_options.map((option, index) => (
-            <div key={index} className="flex items-center gap-1">
-              <input
-                type="checkbox"
-                id={option}
-                name={option}
-                checked={options[option]}
-                onChange={() => handleOptionChange(option)}
-                className="form-checkbox h-5 w-5 text-blue-600"
-              />
-              <label htmlFor={option} className="text-sm">
-                {option}
-              </label>
-            </div>
-          ))}
         </div>
 
         {isProcessing && <h2 className="text-white text-lg">Processing...</h2>}
