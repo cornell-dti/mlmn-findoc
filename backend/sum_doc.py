@@ -28,7 +28,7 @@ chat = ChatOpenAI(
 
 def do_task(doc: str, system_prompt, human_prompt):
     try:
-        return process_query(doc=doc, query=human_prompt.format(text=doc))
+        return process_query(doc=doc, query=human_prompt.format(text=""))
     except Exception as e:
         system_message = SystemMessagePromptTemplate.from_template(system_prompt)
         human_message = HumanMessagePromptTemplate.from_template(
@@ -40,14 +40,14 @@ def do_task(doc: str, system_prompt, human_prompt):
         if len(e.args) > 1:
             _, doc_id = e.args
             insert_qa(
-                query=human_prompt.format(text=doc),
+                query=human_prompt.format(text=""),
                 answer=final_output.content,
                 documentId=doc_id,
             )
         else:
             doc_id = insert_doc(doc=doc)
             insert_qa(
-                query=human_prompt.format(text=doc),
+                query=human_prompt.format(text=""),
                 answer=final_output.content,
                 documentId=doc_id,
             )
@@ -117,6 +117,9 @@ def streamlit():
 
 
 if __name__ == "__main__":
+    # print(
+    #     do_task(CS_2800_SP22, SUMMARIZE_SYSTEM_PROMPT_SYLLABUS, SUMMARIZE_HUMAN_PROMPT)
+    # )
     print(
         do_task(CS_2800_SP22, BACKEND_DATES_SYSTEM_PROMPT, BACKEND_DATES_HUMAN_PROMPT)
     )
