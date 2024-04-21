@@ -2,7 +2,7 @@ QUERY_INSTRUCTIONS = "Enter any query document to summarize:"
 
 # Summary prompts
 SUMMARIZE_HUMAN_PROMPT = (
-    "Summarize this fictional story briefly. Use complete sentences.:\n\n{text}"
+    "Summarize this text briefly. Use complete sentences.:\n\n{text}"
 )
 SUMMARIZE_SYSTEM_PROMPT = "You are an AI designed to provide concise summaries. Focus on extracting key findings, implications, and any significant conclusions from the provided text, suitable for a general audience."
 

@@ -46,12 +46,13 @@ def embed_from_text(text: str):
 
 
 class MilvusInteraction:
-    def __init__(self, client, collectionName):
+    def __init__(self, client: MilvusClient, collectionName):
         self.collectionName = collectionName
         self.client = client
 
     def insert(self, schema: DocumentSchema | QuestionSchema):
-        self.client.insert(self.collectionName, data=schema.schemaToDict())
+        response = self.client.insert(self.collectionName, data=schema.schemaToDict())
+        return response["ids"][0]
 
     def delete(self, ids: list[int]):
         self.client.delete(self.collectionName, ids=ids)
@@ -69,7 +70,9 @@ class MilvusInteraction:
 
 
 def get_closest_distance(doc_list: list[list[dict]]):
-    return doc_list[0][0]["distance"]
+    if len(doc_list[0]) > 0:
+        return doc_list[0][0]["distance"]
+    return None
 
 
 def order_by_timestamp(queries: list[list[dict]]):
