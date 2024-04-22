@@ -63,7 +63,6 @@ def insert_qa(query: str, answer: str, documentId: int):
         q_schema
     )
 
-
 # client.delete("DocumentCollection", ids=0)
 # client.insert("DocumentCollection", data=test_data_dict)
 # print(client.get("DocumentCollection", ids=1))
