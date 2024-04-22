@@ -1,19 +1,37 @@
-from datetime import datetime
+import os
 import json
-from flask import Flask, request, jsonify, Response
+from flask import (
+    Flask,
+    redirect,
+    render_template_string,
+    request,
+    jsonify,
+    Response,
+    session,
+    url_for,
+)
 from dotenv import load_dotenv, find_dotenv
 import werkzeug
 from sum_doc import main
 from compare_docs import compare_docs
 from flask_cors import CORS
-from gcal_integration import add_event_to_calendar
-from datetime import datetime
-from beautiful_date import Jan, Apr, BeautifulDate
+from gcal_integration import CalendarClient, CredentialsPayload
+from typing import Optional
 
+load_dotenv(find_dotenv(), override=True)
 
 server = Flask(__name__)
+
+server.secret_key = os.environ.get("SECRET_KEY")
+server.config["SESSION_TYPE"] = "filesystem"
+
 CORS(server)
-load_dotenv(find_dotenv(), override=True)
+
+os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
+CALLBACK_URL = os.environ.get("CALLBACK_URL")
+API_CLIENT_ID = os.environ.get("API_CLIENT_ID")
+API_CLIENT_SECRET = os.environ.get("API_CLIENT_SECRET")
+SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 
 @server.route("/")
@@ -66,36 +84,80 @@ def compare():
     return Response(generate(), mimetype="text/event-stream")
 
 
+client = CalendarClient(API_CLIENT_ID, API_CLIENT_SECRET, SCOPES)
+
+
+def is_authenticated() -> Optional[CredentialsPayload]:
+    if session.get("credentials"):
+        return session["credentials"]
+
+
+@server.route("/callback")
+def callback():
+    credentials = client.get_credentials(
+        code=request.args.get("code"),
+        callback_url=CALLBACK_URL,
+    )
+    session["credentials"] = {
+        "token": credentials.token,
+        "refresh_token": credentials.refresh_token,
+        "token_uri": credentials.token_uri,
+        "client_id": credentials.client_id,
+        "client_secret": credentials.client_secret,
+        "scopes": credentials.scopes,
+    }
+    print(session["credentials"])
+    return render_template_string(
+        """
+        <html>
+        <body>
+            <script>
+                window.opener.postMessage(
+                    {
+                        type: 'authentication',
+                        data: {{ creds | tojson }}
+                    }, 
+                    '*'
+                );
+                window.close();
+            </script>
+        </body>
+        </html>
+    """,
+        creds=session["credentials"],
+    )
+
+
+@server.route("/auth")
+def auth():
+    return redirect(client.get_auth_url(CALLBACK_URL))
+
+
 @server.route("/export", methods=["POST"])
 def export_to_gcal():
+    credentials_payload = is_authenticated()
+    if not credentials_payload:
+        data = request.get_json()
+        credentials_payload = data.get("credentials")
+        if not credentials_payload:
+            return jsonify("Not authenticated with Google Calendar"), 401
     data = request.get_json()
-    events = data.get("events", [])
-    user_email = data.get("user_email", None)
-    for event in events:
-        try:
-            add_event_to_calendar(
-                summary=event["summary"],
-                start_datetime=datetime.strptime(
-                    event["start_datetime"],
-                    "%Y-%m-%dT%H:%M:%S",
-                ),
-                end_datetime=datetime.strptime(
-                    event["end_datetime"],
-                    "%Y-%m-%dT%H:%M:%S",
-                ),
-                description=event.get("description", ""),
-                location=event.get("location", ""),
-                email_reminder_minutes=event.get("email_reminder_minutes", None),
-                user_email=user_email,
-            )
-        except Exception as e:
-            print("Error in exporting to Google Calendar before: ", e)
-            return (
-                jsonify({"error": "Failed to add some events to Google Calendar"}),
-                500,
-            )
+    updated_events = []
+    for event in data["dates"]["events"]:
+        updated_event = {
+            "summary": event["summary"],
+            "location": event["location"],
+            "description": event["description"],
+            "start": {
+                "dateTime": event["start_datetime"],
+                "timeZone": "America/New_York",
+            },
+            "end": {"dateTime": event["end_datetime"], "timeZone": "America/New_York"},
+        }
+        updated_events.append(updated_event)
 
-    return jsonify({"message": "Events successfully exported to Google Calendar"}), 200
+    client.upload_events(credentials_payload, updated_events)
+    return jsonify("Events added to Google Calendar")
 
 
 if __name__ == "__main__":

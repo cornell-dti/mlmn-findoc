@@ -26,28 +26,31 @@ def process_query(doc: str, query: str):
         client=client, collectionName="DocumentCollection"
     ).search(text=doc)
     closest_doc_dist = get_closest_distance(closest_doc)
-    print(f"closest doc distance: {closest_doc_dist}")
-    if closest_doc_dist >= 0.99:
-        doc_id = closest_doc[0][0]["id"]
-        print(doc_id)
-        closest_query = MilvusInteraction(
-            client=client, collectionName="QuestionAnswerCollection"
-        ).search(text=query, output_fields=["answer"], filter=f"documentId == {doc_id}")
-        closest_query_dist = get_closest_distance(closest_query)
-        print(f"closest query distance: {closest_query_dist}")
-        if closest_query_dist >= 0.75:
-            return closest_query[0][0]["entity"]["answer"]
-        else:
-            raise Exception("Query not found")
-    else:
-        raise Exception("Document not found")
+    if closest_doc_dist:
+        print(f"closest doc distance: {closest_doc_dist}")
+        if closest_doc_dist >= 0.99:
+            doc_id = closest_doc[0][0]["id"]
+            print(doc_id)
+            closest_query = MilvusInteraction(
+                client=client, collectionName="QuestionAnswerCollection"
+            ).search(
+                text=query, output_fields=["answer"], filter=f"documentId == {doc_id}"
+            )
+            closest_query_dist = get_closest_distance(closest_query)
+            if closest_query_dist:
+                print(f"closest query distance: {closest_query_dist}")
+                if closest_query_dist >= 0.75:
+                    return closest_query[0][0]["entity"]["answer"]
+            raise Exception("Query not found", doc_id)
+    raise Exception("Document not found")
 
 
 def insert_doc(doc: str):
     doc_schema = DocumentSchema(documentVector=embed_from_text(doc), documentText=doc)
-    MilvusInteraction(client=client, collectionName="DocumentCollection").insert(
-        doc_schema
-    )
+    doc_id = MilvusInteraction(
+        client=client, collectionName="DocumentCollection"
+    ).insert(doc_schema)
+    return doc_id
 
 
 def insert_qa(query: str, answer: str, documentId: int):
