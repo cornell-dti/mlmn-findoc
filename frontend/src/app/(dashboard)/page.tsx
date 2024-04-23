@@ -12,6 +12,7 @@ import { DialogTitle, FormControl, IconButton, InputLabel, MenuItem, Select, Sel
 import { getSession } from "next-auth/react";
 import Chat from "@/components/ScrollingChat";
 import supabase from "@/utils/supabase";
+import './page.css';
 
 const summary_options = ["policies", "dates", "summary", "resources", "instructors"];
 const kpi_options = ["course_instructors", "office_hours", "lectures", "description", "learning_objectives", "prerequisites"];
@@ -65,7 +66,7 @@ const Home: React.FC<HomeProps> = (props) => {
 
 
   const options_to_use = summary_options.reduce((acc: any, option) => {
-    acc[option] = true;
+    acc[option] = false;
     return acc;
   }, {});
   const selected_kpis = kpi_options.reduce((acc: any, kpioption) => {
@@ -222,9 +223,9 @@ const Home: React.FC<HomeProps> = (props) => {
 
   async function getFileHistory(): Promise<string[]> {
     const response = await supabase
-        .from("user-doc")
-        .select("*")
-        .eq("userID", 9);
+      .from("user-doc")
+      .select("*")
+      .eq("userID", 9);
 
     // Map the response data to extract the "docID" values
     return response.data?.map(val => val["docID"]) as string[];
@@ -250,21 +251,18 @@ const Home: React.FC<HomeProps> = (props) => {
           {isCompare ? "What do you want to compare?" : ""}
         </h1>
 
+
         {isParse ? (
-          <div className="flex items-center gap-2 text-white" style={{ marginBottom: "20px" }}>
+          <div className="flex justify-center gap-5 w-full" style={{ marginBottom: "20px" }}>
             {summary_options.map((option, index) => (
-              <div key={index} className="flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  id={option}
-                  name={option}
-                  checked={options[option]}
-                  onChange={() => handleOptionChange(option)}
-                  className="form-checkbox h-5 w-5 text-blue-600"
-                />
-                <label htmlFor={option} className="text-sm">
+              <div key={index}
+                onClick={() => handleOptionChange(option)}
+                className={`rounded-md shadow cursor-pointer p-4 transition-colors duration-300 ${options[option] ? "background-click" : "default-background"} border border-gray-200 flex flex-col items-center justify-center flex-grow`}
+                style={{ width: '150px', height: '75px', minWidth: '150px', minHeight: '75px', maxWidth: '150px', maxHeight: '75px' }}
+              >
+                <div className="text-white text-lg font-medium">
                   {option}
-                </label>
+                </div>
               </div>
             ))}
           </div>
@@ -272,113 +270,100 @@ const Home: React.FC<HomeProps> = (props) => {
           ""
         )}
 
-        <div className="flex w-full justify-center gap-4 mb-4">
-          <div
-            className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
-              isProcessing ? "bg-gray-200" : "bg-transparent"
-            } max-w-sm`}
-          >
-            <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
-              <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
-                <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
-                {uploadedFileName ? (
-                  <span className="text-sm text-blue-500">{uploadedFileName}</span>
-                ) : (
-                  <label className="text-sm -mb-2">Upload first file</label>
+
+
+        <div className="flex w-full flex-col justify-center gap-4 mb-4">
+          <div className="flex w-full justify-center gap-4 mb-4">
+            <div
+              className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${isProcessing ? "bg-gray-200" : "bg-transparent"
+                } max-w-sm`}
+            >
+              <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
+                <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
+                  <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
+                  {(uploadedFileName) ? (
+                    <span className="text-sm text-blue-500">{uploadedFileName}</span>
+                  ) : (
+                    <label className="text-sm -mb-2">Upload first file</label>
+                  )}
+                </div>
+                {!uploadedFileName && (
+                  <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
+                    Drag and drop <br />
+                    or choose a file to upload
+                  </span>
                 )}
-              </div>
-              {!uploadedFileName && (
-                <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
-                  Drag and drop <br />
-                  or choose a file to upload
-                </span>
-              )}
-            </label>
-            <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
+              </label>
+              <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
+
+            </div>
+
+
+
+
           </div>
 
           {isSummarize ? (
             <>
-              <div className="text-white" style={{ marginTop: '65px' }}>or</div> 
-              <FormControl sx={{ 
-              width: '40%', 
-              marginTop: '50px', 
-              '.MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'white', 
-                  borderStyle: 'dashed',
-                },
-                '&:hover fieldset': {
-                  borderColor: 'white', 
-                  borderStyle: 'dashed', 
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'white',
-                  borderStyle: 'dashed', 
-                },
-              },
-              color: 'white', // Optional: If you also want to change the color of the input label and icon
-            }} >
-                <InputLabel id="demo-simple-select-label" style={{ color: 'white' }}>Select from existing file</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={file}
-                  label="Select from existing file"
-                  onChange={handleDropDownChange}
-                  sx={{
-                    color: 'white', // sets the color of the select input text
-                    '& .MuiSvgIcon-root': { // targets the dropdown arrow icon specifically
-                      color: 'white', // sets the color of the dropdown arrow
-                    },
-                  }}
-                  MenuProps={{
-                    autoFocus: false,
-                    PaperProps: {
-                      style: {
-                        height: "125px",
-                        overflowY: "scroll"
-                      }
-                    }}}
-                >
-                  {files.map(file => (
-                    <MenuItem key={file} value={file}>{file}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <div className="text-white" style={{ marginTop: "65px" }}>
+                or
+              </div>
+              <div
+                className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${isProcessing ? "bg-gray-200" : "bg-transparent"
+                  } max-w-sm`}
+              >
+                <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
+                  <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
+                    <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
+                    {uploadedFileName ? (
+                      <span className="text-sm text-blue-500">{uploadedFileName}</span>
+                    ) : (
+                      <label className="text-sm -mb-2">Upload first file</label>
+                    )}
+                  </div>
+                  {!uploadedFileName && (
+                    <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
+                      Drag and drop <br />
+                      or choose a file to upload
+                    </span>
+                  )}
+                </label>
+                <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
+              </div>
             </>
           ) : (
             ""
-          )} 
-
-          {uploadedFileName && isCompare && (
-            <div
-              className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 bg-transparent ${
-                isProcessing ? "bg-gray-200" : "bg-transparent"
-              } max-w-sm`}
-            >
-              <label htmlFor="second-file-upload" className="flex flex-col align-center justify-center text-center">
-                <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
-                  <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
-                  {secondFileName ? (
-                    <span className="text-sm text-blue-500">{secondFileName}</span>
-                  ) : (
-                    <label className="text-sm -mb-2">Upload second file</label>
-                  )}
-                </div>
-                {!secondFileName && (
-                  <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
-                    Drag and drop <br />
-                    or choose a second file to compare with the first
-                  </span>
-                )}
-              </label>
-              <input id="second-file-upload" type="file" accept=".txt" className="hidden" onChange={handleSecondFileUpload} />
-            </div>
           )}
-        </div>
 
-          {isSummarize || isParse ? (
+          {
+            uploadedFileName && isCompare && (
+              <div
+                className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 bg-transparent ${isProcessing ? "bg-gray-200" : "bg-transparent"
+                  } max-w-sm`}
+              >
+                <label htmlFor="second-file-upload" className="flex flex-col align-center justify-center text-center">
+                  <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
+                    <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
+                    {secondFileName ? (
+                      <span className="text-sm text-blue-500">{secondFileName}</span>
+                    ) : (
+                      <label className="text-sm -mb-2">Upload second file</label>
+                    )}
+                  </div>
+                  {!secondFileName && (
+                    <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
+                      Drag and drop <br />
+                      or choose a second file to compare with the first
+                    </span>
+                  )}
+                </label>
+                <input id="second-file-upload" type="file" accept=".txt" className="hidden" onChange={handleSecondFileUpload} />
+              </div>
+            )
+          }
+        </div >
+
+        {isSummarize || isParse ? (
           <>
             <div className="flex flex-col items-center mt-4">
               <label htmlFor="document-name" className="text-white font-bold mb-2">
@@ -396,9 +381,8 @@ const Home: React.FC<HomeProps> = (props) => {
                 type="submit"
                 onClick={handleSubmitButton}
                 disabled={submitDisabled}
-                className={`mt-3 w-3/4 bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm ${
-                  !submitDisabled ? 'hover:bg-blue-700' : 'opacity-80 cursor-not-allowed'
-                }`}              >
+                className={`mt-3 w-3/4 bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm ${!submitDisabled ? 'hover:bg-blue-700' : 'opacity-80 cursor-not-allowed'
+                  }`}              >
                 Submit
               </button>
             </div>
@@ -407,13 +391,15 @@ const Home: React.FC<HomeProps> = (props) => {
           ""
         )}
         {isProcessing && <h2 className="text-white text-lg">Processing...</h2>}
-        {options.dates && !isProcessing && firstFile !== null && (
-          <div className="flex flex-col items-center justify-center">
-            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded mt-4" onClick={onExportClick}>
-              Export to Google Calendar
-            </button>
-          </div>
-        )}
+        {
+          options.dates && !isProcessing && firstFile !== null && (
+            <div className="flex flex-col items-center justify-center">
+              <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded mt-4" onClick={onExportClick}>
+                Export to Google Calendar
+              </button>
+            </div>
+          )
+        }
         {/* <div className="overflow-x-scroll overflow-y-hidden max-w-screen-lg mt-10 max-h-80">
           <div className="flex flex-no-wrap max-h-96">
             {Object.entries(messages).map(([key, message], index) =>
@@ -459,78 +445,73 @@ const Home: React.FC<HomeProps> = (props) => {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
+      </div >
 
-      
-      {isSubmitted && firstFileContent && (
-        <>
-          <h3 className="text-4xl text-white mb-6" style={{ marginTop: "30px" }}>
-            Chat
-          </h3>
-          {/* <Chat messages={[]} doc_id={448985163764905353} /> */}
-          <Chat messages={messages} doc_id={448985163764905353} />
-          {/* <div className="file-preview-container">
-            <div
-              className="file-preview-header"
-              style={{
-                backgroundColor: "#33302F",
-                border: "1px solid #D1D5DB",
-                borderTopLeftRadius: 10,
-                borderTopRightRadius: 10,
-                padding: "15px 10px",
-              }}
-            >
-              Uploaded File Preview: {uploadedFileName}
-              {kpi_options.map((option, index) => (
-                <div key={index} className="flex items-center gap-1" style={{ margin: "10px 10px" }}>
-                  <input
-                    type="checkbox"
-                    id={option}
-                    name={option}
-                    checked={options[option]}
-                    onChange={() => handlekpiOptionChange(option)}
-                    className="form-checkbox h-5 w-5 text-blue-600"
-                  />
-                  <label htmlFor={option} className="text-sm">
-                    {option}
-                  </label>
-                </div>
-              ))}
-            </div>
-            <div
-              className="file-preview-content mt-4 p-4 bg-white bg-opacity-10 text-white overflow-y-auto max-h-96 w-full"
-              style={{ marginTop: 0, border: "1px solid #D1D5DB", resize: "vertical" }}
-            >
-              <pre>
-                {
-                  // Replace 'highlightedSubstring' with the actual text you want to highlight
-                  firstFileContent
-                    .split(new RegExp(`(${"Eshan Chattopadhyay"})`, "gi"))
-                    .reduce<React.ReactNode[]>((prev, current, index, array) => {
-                      // Check if the current segment matches the highlighted text
-                      const isMatch = current.toLowerCase() === "Eshan Chattopadhyay".toLowerCase();
+      <h3 className="text-4xl text-white mb-6" style={{ marginTop: "30px" }}>
+        Uploaded File Preview
+      </h3>
+      {firstFileContent && (
+        <div className="file-preview-container">
+          <div
+            className="file-preview-header"
+            style={{
+              backgroundColor: "#33302F",
+              border: "1px solid #D1D5DB",
+              borderTopLeftRadius: 10,
+              borderTopRightRadius: 10,
+              padding: "15px 10px",
+            }}
+          >
+            Uploaded File Preview: {uploadedFileName}
+            {/* {kpi_options.map((option, index) => (
+              <div key={index} className="flex items-center gap-1" style={{ margin: "10px 10px" }}>
+                <input
+                  type="checkbox"
+                  id={option}
+                  name={option}
+                  checked={options[option]}
+                  onChange={() => handlekpiOptionChange(option)}
+                  className="form-checkbox h-5 w-5 text-blue-600"
+                />
+                <label htmlFor={option} className="text-sm">
+                  {option}
+                </label>
+              </div>
+            ))} */}
+          </div>
+          <div
+            className="file-preview-content mt-4 p-4 bg-white bg-opacity-10 text-white overflow-y-auto max-h-96 w-full"
+            style={{ marginTop: 0, border: "1px solid #D1D5DB", resize: "vertical" }}
+          >
+            <pre>
+              {
+                // Replace 'highlightedSubstring' with the actual text you want to highlight
+                firstFileContent
+                  .split(new RegExp(`(${"Eshan Chattopadhyay"})`, "gi"))
+                  .reduce<React.ReactNode[]>((prev, current, index, array) => {
+                    // Check if the current segment matches the highlighted text
+                    const isMatch = current.toLowerCase() === "Eshan Chattopadhyay".toLowerCase();
 
-                      // If it's a match, push the highlighted span, otherwise push the current string
-                      return isMatch
-                        ? [
-                            ...prev,
-                            <span
-                              key={index}
-                              style={{ backgroundColor: "#B8AEAB", cursor: "pointer" }}
-                              onClick={() => alert("Substring clicked")}
-                            >
-                              {current}
-                            </span>,
-                          ]
-                        : [...prev, current];
-                    }, [])
-                }
-              </pre>
-            </div>
-          </div> */}
-        </>
+                    // If it's a match, push the highlighted span, otherwise push the current string
+                    return isMatch
+                      ? [
+                        ...prev,
+                        <span
+                          key={index}
+                          style={{ backgroundColor: "#B8AEAB", cursor: "pointer" }}
+                          onClick={() => alert("Substring clicked")}
+                        >
+                          {current}
+                        </span>,
+                      ]
+                      : [...prev, current];
+                  }, [])
+              }
+            </pre>
+          </div>
+        </div>
       )}
-    </main>
+    </main >
   );
 };
 
