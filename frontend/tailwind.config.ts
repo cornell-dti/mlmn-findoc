@@ -13,6 +13,8 @@ const config: Config = {
         sidebar: '#000000',
         sidebarText: '#73710',
         sidebarTextActive: '#ffffff',
+        buttonColor: '#0D509D',
+        hoverColor: '#695E5E'
       }
     },
   },
