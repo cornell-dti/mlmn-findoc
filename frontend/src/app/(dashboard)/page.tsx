@@ -10,6 +10,7 @@ import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseIcon from "@mui/icons-material/Close";
 import { DialogTitle, IconButton } from "@mui/material";
 import { getSession } from "next-auth/react";
+import './page.css';
 
 const summary_options = ["policies", "dates", "summary", "resources", "instructors"];
 const kpi_options = ["course_instructors", "office_hours", "lectures", "description", "learning_objectives", "prerequisites"];
@@ -57,7 +58,7 @@ const Home: React.FC<HomeProps> = (props) => {
   const isCompare = props.function === "compare";
 
   const options_to_use = summary_options.reduce((acc: any, option) => {
-    acc[option] = true;
+    acc[option] = false;
     return acc;
   }, {});
   const selected_kpis = kpi_options.reduce((acc: any, kpioption) => {
@@ -206,21 +207,18 @@ const Home: React.FC<HomeProps> = (props) => {
           {isCompare ? "What do you want to compare?" : ""}
         </h1>
 
+
         {isParse ? (
-          <div className="flex items-center gap-2 text-white" style={{ marginBottom: "20px" }}>
+          <div className="flex justify-center gap-5 w-full" style={{ marginBottom: "20px" }}>
             {summary_options.map((option, index) => (
-              <div key={index} className="flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  id={option}
-                  name={option}
-                  checked={options[option]}
-                  onChange={() => handleOptionChange(option)}
-                  className="form-checkbox h-5 w-5 text-blue-600"
-                />
-                <label htmlFor={option} className="text-sm">
+              <div key={index}
+                onClick={() => handleOptionChange(option)}
+                className={`rounded-md shadow cursor-pointer p-4 transition-colors duration-300 ${options[option] ? "background-click" : "default-background"} border border-gray-200 flex flex-col items-center justify-center flex-grow`}
+                style={{ width: '150px', height: '75px', minWidth: '150px', minHeight: '75px', maxWidth: '150px', maxHeight: '75px' }}
+              >
+                <div className="text-white text-lg font-medium">
                   {option}
-                </label>
+                </div>
               </div>
             ))}
           </div>
@@ -228,29 +226,37 @@ const Home: React.FC<HomeProps> = (props) => {
           ""
         )}
 
-        <div className="flex w-full justify-center gap-4 mb-4">
-          <div
-            className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
-              isProcessing ? "bg-gray-200" : "bg-transparent"
-            } max-w-sm`}
-          >
-            <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
-              <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
-                <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
-                {uploadedFileName ? (
-                  <span className="text-sm text-blue-500">{uploadedFileName}</span>
-                ) : (
-                  <label className="text-sm -mb-2">Upload first file</label>
+
+
+        <div className="flex w-full flex-col justify-center gap-4 mb-4">
+          <div className="flex w-full justify-center gap-4 mb-4">
+            <div
+              className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${isProcessing ? "bg-gray-200" : "bg-transparent"
+                } max-w-sm`}
+            >
+              <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
+                <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
+                  <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
+                  {(uploadedFileName) ? (
+                    <span className="text-sm text-blue-500">{uploadedFileName}</span>
+                  ) : (
+                    <label className="text-sm -mb-2">Upload first file</label>
+                  )}
+                </div>
+                {!uploadedFileName && (
+                  <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
+                    Drag and drop <br />
+                    or choose a file to upload
+                  </span>
                 )}
-              </div>
-              {!uploadedFileName && (
-                <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
-                  Drag and drop <br />
-                  or choose a file to upload
-                </span>
-              )}
-            </label>
-            <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
+              </label>
+              <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
+
+            </div>
+
+
+
+
           </div>
 
           {isSummarize ? (
@@ -259,9 +265,8 @@ const Home: React.FC<HomeProps> = (props) => {
                 or
               </div>
               <div
-                className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
-                  isProcessing ? "bg-gray-200" : "bg-transparent"
-                } max-w-sm`}
+                className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${isProcessing ? "bg-gray-200" : "bg-transparent"
+                  } max-w-sm`}
               >
                 <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
                   <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
@@ -286,11 +291,10 @@ const Home: React.FC<HomeProps> = (props) => {
             ""
           )}
 
-          {uploadedFileName && (
+          {(uploadedFileName && !isParse) && (
             <div
-              className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 bg-transparent ${
-                isProcessing ? "bg-gray-200" : "bg-transparent"
-              } max-w-sm`}
+              className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 bg-transparent ${isProcessing ? "bg-gray-200" : "bg-transparent"
+                } max-w-sm`}
             >
               <label htmlFor="second-file-upload" className="flex flex-col align-center justify-center text-center">
                 <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
@@ -372,7 +376,7 @@ const Home: React.FC<HomeProps> = (props) => {
             }}
           >
             Uploaded File Preview: {uploadedFileName}
-            {kpi_options.map((option, index) => (
+            {/* {kpi_options.map((option, index) => (
               <div key={index} className="flex items-center gap-1" style={{ margin: "10px 10px" }}>
                 <input
                   type="checkbox"
@@ -386,7 +390,7 @@ const Home: React.FC<HomeProps> = (props) => {
                   {option}
                 </label>
               </div>
-            ))}
+            ))} */}
           </div>
           <div
             className="file-preview-content mt-4 p-4 bg-white bg-opacity-10 text-white overflow-y-auto max-h-96 w-full"
@@ -404,15 +408,15 @@ const Home: React.FC<HomeProps> = (props) => {
                     // If it's a match, push the highlighted span, otherwise push the current string
                     return isMatch
                       ? [
-                          ...prev,
-                          <span
-                            key={index}
-                            style={{ backgroundColor: "#B8AEAB", cursor: "pointer" }}
-                            onClick={() => alert("Substring clicked")}
-                          >
-                            {current}
-                          </span>,
-                        ]
+                        ...prev,
+                        <span
+                          key={index}
+                          style={{ backgroundColor: "#B8AEAB", cursor: "pointer" }}
+                          onClick={() => alert("Substring clicked")}
+                        >
+                          {current}
+                        </span>,
+                      ]
                       : [...prev, current];
                   }, [])
               }
