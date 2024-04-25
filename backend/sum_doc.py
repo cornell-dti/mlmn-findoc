@@ -74,6 +74,16 @@ def get_instructors(doc: str):
     return do_task(doc, INSTRUCTOR_SYSTEM_PROMPT, INSTRUCTOR_HUMAN_PROMPT)
 
 
+def follow_up(doc: str, query: str):
+    return do_task(
+        query,
+        "You are an AI designed to answer questions based on the provided document. Please answer the following question based on the document content:\n\n Document: {doc}".format(
+            doc=doc, text=query
+        ),
+        FOLLOW_UP_SYSTEM_PROMPT.format(doc=doc, text=query),
+    )
+
+
 def main(doc: str, tasks: dict) -> Generator[Any, Any, Any]:
     options_to_tasks = {
         "summary": sum_doc,

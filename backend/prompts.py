@@ -108,5 +108,4 @@ RESOURCES_HUMAN_PROMPT = "Summarize the resources mentioned in the document. Thi
 INSTRUCTOR_SYSTEM_PROMPT = "Summarize instructor and TA details for students, focusing on essential information. Response should be in markdown format and appropriately use headers and lists.."
 INSTRUCTOR_HUMAN_PROMPT = "Provide concise information about the course's professor, instructors and TAs, including name, contact details, and office hours.:\n\n{text}"
 
-
-FOLLOW_UP_PROMPT = "This was your previous answer: {prev_ans}. Now, please answer the following question: {question}"
+FOLLOW_UP_SYSTEM_PROMPT = "You are an AI designed to answer questions based on the provided document. Please answer the following question based on the document content:\n\n Document: {doc}\n\n Question: {text}"
