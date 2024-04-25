@@ -106,7 +106,6 @@ def callback():
         "client_secret": credentials.client_secret,
         "scopes": credentials.scopes,
     }
-    print(session["credentials"])
     return render_template_string(
         """
         <html>
