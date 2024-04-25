@@ -15,7 +15,10 @@ import werkzeug
 from sum_doc import main, follow_up
 from compare_docs import compare_docs
 from flask_cors import CORS
-from gcal_integration import CalendarClient, CredentialsPayload
+from gcal_integration import add_event_to_calendar
+from datetime import datetime
+from beautiful_date import Jan, Apr, BeautifulDate
+from supabase_client import get_docs_by_user, get_queries_by_user
 from typing import Optional
 
 load_dotenv(find_dotenv(), override=True)
@@ -150,33 +153,49 @@ def export_to_gcal():
         if not credentials_payload:
             return jsonify("Not authenticated with Google Calendar"), 401
     data = request.get_json()
-    updated_events = []
-    # Find the key that contains the events list
-    event_key = next(
-        (key for key in data["dates"] if isinstance(data["dates"][key], list)), None
-    )
+    events = data.get("events", [])
+    user_email = data.get("user_email", None)
+    for event in events:
+        try:
+            add_event_to_calendar(
+                summary=event["summary"],
+                start_datetime=datetime.strptime(
+                    event["start_datetime"],
+                    "%Y-%m-%dT%H:%M:%S",
+                ),
+                end_datetime=datetime.strptime(
+                    event["end_datetime"],
+                    "%Y-%m-%dT%H:%M:%S",
+                ),
+                description=event.get("description", ""),
+                location=event.get("location", ""),
+                email_reminder_minutes=event.get("email_reminder_minutes", None),
+                user_email=user_email,
+            )
+        except Exception as e:
+            print("Error in exporting to Google Calendar before: ", e)
+            return (
+                jsonify({"error": "Failed to add some events to Google Calendar"}),
+                500,
+            )
 
-    if event_key:
-        for event in data["dates"][event_key]:
-            updated_event = {
-                "summary": event["summary"],
-                "location": event["location"],
-                "description": event["description"],
-                "start": {
-                    "dateTime": event["start_datetime"],
-                    "timeZone": "America/New_York",
-                },
-                "end": {
-                    "dateTime": event["end_datetime"],
-                    "timeZone": "America/New_York",
-                },
-            }
-            updated_events.append(updated_event)
-    else:
-        print("No event list found in data['dates']")
+    return jsonify({"message": "Events successfully exported to Google Calendar"}), 200
 
-    client.upload_events(credentials_payload, updated_events)
-    return jsonify("Events added to Google Calendar")
+@server.route("/get_docs", methods=["GET"])
+def get_docs():
+    user_id = request.args.get("user_id")
+    if not user_id:
+        return Response("User ID is required", status=400)
+    docs = get_docs_by_user(user_id)
+    return jsonify(docs), 200
+
+@server.route("/get_queries", methods=["GET"])
+def get_queries():
+    user_id = request.args.get("user_id")
+    if not user_id:
+        return Response("User ID is required", status=400)
+    queries = get_queries_by_user(user_id)
+    return jsonify(queries), 200
 
 
 if __name__ == "__main__":
