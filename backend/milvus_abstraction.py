@@ -50,7 +50,7 @@ class MilvusInteraction:
         self.collectionName = collectionName
         self.client = client
 
-    def insert(self, schema: (DocumentSchema | QuestionSchema)):
+    def insert(self, schema: DocumentSchema | QuestionSchema):
         response = self.client.insert(self.collectionName, data=schema.schemaToDict())
         return response["ids"][0]
 
@@ -68,6 +68,23 @@ class MilvusInteraction:
         )
         return closestQuery
 
+    def getQAbyID(self, question_ids, doc_id):
+        qa_dicts = self.client.query(
+            collection_name="QuestionAnswerCollection",
+            ids=question_ids,
+            output_fields=["questionText", "answer", "timestamp", "documentId"],
+        )
+        filtered_qa = [
+            {
+                "questionText": q["questionText"],
+                "answer": q["answer"],
+                "timestamp": q["timestamp"],
+            }
+            for q in qa_dicts
+            if q["documentId"] == doc_id
+        ]
+        return order_by_timestamp(filtered_qa)
+
 
 def get_closest_distance(doc_list: list[list[dict]]):
     if len(doc_list[0]) > 0:
@@ -75,5 +92,6 @@ def get_closest_distance(doc_list: list[list[dict]]):
     return None
 
 
-def order_by_timestamp(queries: list[list[dict]]):
-    return queries[0].sort(key=(lambda x: x["timestamp"]))
+def order_by_timestamp(queries: list[dict]):
+    queries.sort(key=(lambda x: x["timestamp"]))
+    return queries

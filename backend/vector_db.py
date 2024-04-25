@@ -13,6 +13,8 @@ from milvus_abstraction import (
     get_closest_distance,
 )
 
+from supabase_client import get_docs_by_user, get_queries_by_user
+
 load_dotenv(find_dotenv(), override=True)
 client = MilvusClient(
     uri=os.getenv("MILVUS_CLUSTER_ENDPOINT"),
@@ -62,11 +64,21 @@ def insert_qa(query: str, answer: str, documentId: int):
         documentId=documentId,
         timestamp=timestamp,
     )
-    MilvusInteraction(client=client, collectionName="QuestionAnswerCollection").insert(
-        q_schema
-    )
+    query_id = MilvusInteraction(
+        client=client, collectionName="QuestionAnswerCollection"
+    ).insert(q_schema)
+    return query_id
 
 
+def get_qa_by_user(user_id: str, doc_id: str):
+    queries = get_queries_by_user(user_id)
+    query_ids = [query["queryID"] for query in list(queries)[0][1]]
+    return MilvusInteraction(
+        client=client, collectionName="QuestionAnswerCollection"
+    ).getQAbyID(question_ids=query_ids, doc_id=doc_id)
+
+
+print(get_qa_by_user("9", 448985163764903046))
 # client.delete("DocumentCollection", ids=0)
 # client.insert("DocumentCollection", data=test_data_dict)
 # print(client.get("DocumentCollection", ids=1))
