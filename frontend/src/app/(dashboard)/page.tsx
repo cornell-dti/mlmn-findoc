@@ -98,7 +98,7 @@ const Home: React.FC<HomeProps> = (props) => {
     window.addEventListener(
       "message",
       (event) => {
-        if (event.origin !== "http://localhost:8080") return;
+        if (event.origin !== process.env.NEXT_PUBLIC_SERVER_URL) return;
 
         if (event.data.type === "authentication") {
           console.log("Received credentials:", event.data.data);
