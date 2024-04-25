@@ -142,18 +142,29 @@ def export_to_gcal():
             return jsonify("Not authenticated with Google Calendar"), 401
     data = request.get_json()
     updated_events = []
-    for event in data["dates"]["events"]:
-        updated_event = {
-            "summary": event["summary"],
-            "location": event["location"],
-            "description": event["description"],
-            "start": {
-                "dateTime": event["start_datetime"],
-                "timeZone": "America/New_York",
-            },
-            "end": {"dateTime": event["end_datetime"], "timeZone": "America/New_York"},
-        }
-        updated_events.append(updated_event)
+    # Find the key that contains the events list
+    event_key = next(
+        (key for key in data["dates"] if isinstance(data["dates"][key], list)), None
+    )
+
+    if event_key:
+        for event in data["dates"][event_key]:
+            updated_event = {
+                "summary": event["summary"],
+                "location": event["location"],
+                "description": event["description"],
+                "start": {
+                    "dateTime": event["start_datetime"],
+                    "timeZone": "America/New_York",
+                },
+                "end": {
+                    "dateTime": event["end_datetime"],
+                    "timeZone": "America/New_York",
+                },
+            }
+            updated_events.append(updated_event)
+    else:
+        print("No event list found in data['dates']")
 
     client.upload_events(credentials_payload, updated_events)
     return jsonify("Events added to Google Calendar")
