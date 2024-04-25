@@ -6,7 +6,7 @@ supabase_key: str = os.getenv("SUPABASE_KEY")
 supabase_client: Client = create_client(supabase_url, supabase_key)
 
 def get_docs_by_user(user_id: str):
-    return supabase_client.from_("docs").select("*").eq("user_id", user_id)
+    return supabase_client.from_("docs").select("*").eq("userID", user_id).execute()
 
 def get_queries_by_user(user_id: str):
-    return supabase_client.from_("queries").select("*").eq("user_id", user_id)
+    return supabase_client.from_("user-query").select("*").eq("userID", user_id).execute()
