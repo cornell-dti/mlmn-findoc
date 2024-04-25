@@ -65,7 +65,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <button onClick={() => signOut()} className="bottom-0 left-0 w-full border-solid p-4 text-white text-center">
           Log Out
         </button>
-        <img src="/logos/dti.png" alt="DTI Logo" className="w-max h-max mx-auto border-t border-gray-800 p-4 mt-auto" />
+        <div className="flex items-stretch justify-center align-bottom absolute bottom-6 left-0">
+          <img src="/logos/mlmn_logo.jpeg" alt="Mlmn Logo" className="flex-none p-4 w-1/3 " />
+          <img src="/logos/dti_logo.png" alt="DTI Logo" className="flex-none p-4 w-1/3 " />
+        </div>
+        <p className = "text-center justify-center font-bold text-white align-bottom absolute bottom-2 left-0 right-0 mx-auto"> Millennium x Cornell DTI</p>
       </aside>
       <div className={`flex-1  transition-margin duration-200 ease-in-out bg-mainContent ${sidebarOpen ? "ml-64" : "ml-0"}`}>
         <main className="min-h-screen" style={{ backgroundColor: "#231f1e" }}>
