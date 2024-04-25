@@ -3,6 +3,7 @@ import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { uploadFile, processResponse } from "@/utils/files";
 import FormattedMessage from "@/components/ResponseFormat";
+import ScrollingMsg from "@/components/ScrollingChat";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
@@ -45,6 +46,7 @@ export default function Home() {
   const [firstFileContent, setFirstFileContent] = useState('');
   const [highlightedContent, setHighlightedContent] = useState([]);
   const [highlightPattern, setHighlightPattern] = useState<RegExp | null>(null);
+  // const [isChatTrue, setIsChatTrue] = useState<boolean>(false);
 
   const options_to_use = summary_options.reduce((acc: any, option) => {
     acc[option] = true;
@@ -248,29 +250,13 @@ export default function Home() {
             </button>
           </div>
         )}
-        <div className="overflow-x-scroll overflow-y-hidden max-w-screen-lg mt-10 max-h-80">
-          <div className="flex flex-no-wrap max-h-96">
-            {Object.entries(messages).map(([key, message], index) =>
-              key === "dates" ? null : (
-                <div className="relative flex-shrink-0 w-1/2 min-w-64 h-64 mt-2" key={index}>
-                  <IconButton
-                    aria-label="expand"
-                    onClick={() => handleOpenDialog(`Response ${key}`, message)}
-                    className="absolute top-2 right-2 text-white bg-gray-500 bg-opacity-100 hover:bg-gray-600"
-                  >
-                    <OpenInFullIcon />
-                  </IconButton>
-                  <h2 className="text-white text-lg">
-                    <mark className="bg-gray-500 text-white px-2 py-1">{`Response ${key}`}</mark>
-                  </h2>
-                  <div className="bg-white bg-opacity-10 mr-4 pb-64 overflow-y-auto max-h-96">
-                    <FormattedMessage key={index} message={message} />
-                  </div>
-                </div>
-              )
-            )}
-          </div>
+
+        <div className="scrolling">
+          {}
+          {messages!=null && <ScrollingMsg message={Object.values(messages)} />}
         </div>
+
+
         <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
           <DialogContent>
             <IconButton aria-label="close" onClick={handleCloseDialog} style={{ position: "absolute", right: 8, top: 8 }}>
