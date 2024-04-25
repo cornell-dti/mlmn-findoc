@@ -8,7 +8,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseIcon from "@mui/icons-material/Close";
-import { DialogTitle, FormControl, IconButton, InputLabel, MenuItem, Select } from "@mui/material";
+import { DialogTitle, FormControl, IconButton, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { getSession } from "next-auth/react";
 import Chat from "@/components/ScrollingChat";
 
@@ -55,9 +55,10 @@ const Home: React.FC<HomeProps> = (props) => {
   const [userEmail, setUserEmail] = useState<string>("");
   const [highlightedContent, setHighlightedContent] = useState([]);
   const [highlightPattern, setHighlightPattern] = useState<RegExp | null>(null);
-  const isSummarize = props.function === "summarize";
-  const isParse = props.function === "parse";
-  const isCompare = props.function === "compare";
+  const isSummarize = props.function === "summarize"
+  const isParse = props.function === "parse"
+  const isCompare = props.function === "compare"
+  const [file, setFile] = React.useState('');
 
   const options_to_use = summary_options.reduce((acc: any, option) => {
     acc[option] = true;
@@ -210,7 +211,9 @@ const Home: React.FC<HomeProps> = (props) => {
     }
   };
 
-  const handleChange = () => {}
+  const handleDropDownChange = (event: SelectChangeEvent) => {
+    setFile(event.target.value as string);
+  };
 
   return (
     <main className="flex flex-col items-center justify-between p-8">
@@ -271,14 +274,38 @@ const Home: React.FC<HomeProps> = (props) => {
           {isSummarize ? (
             <>
               <div className="text-white" style={{ marginTop: '65px' }}>or</div> 
-              <FormControl style={{ width: "40%", marginTop: '65px' }} >
+              <FormControl sx={{ 
+              width: '40%', 
+              marginTop: '50px', 
+              '.MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'white', 
+                  borderStyle: 'dashed',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'white', 
+                  borderStyle: 'dashed', 
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'white',
+                  borderStyle: 'dashed', 
+                },
+              },
+              color: 'white', // Optional: If you also want to change the color of the input label and icon
+            }} >
                 <InputLabel id="demo-simple-select-label" style={{ color: 'white' }}>Select from existing file</InputLabel>
                 <Select
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
-                  value={"8"}
+                  value={file}
                   label="Select from existing file"
-                  onChange={handleChange}
+                  onChange={handleDropDownChange}
+                  sx={{
+                    color: 'white', // sets the color of the select input text
+                    '& .MuiSvgIcon-root': { // targets the dropdown arrow icon specifically
+                      color: 'white', // sets the color of the dropdown arrow
+                    },
+                  }}
                 >
                   <MenuItem value={10}>File 1</MenuItem>
                   <MenuItem value={20}>File 2</MenuItem>
