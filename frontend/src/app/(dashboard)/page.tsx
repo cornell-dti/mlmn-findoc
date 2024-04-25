@@ -14,7 +14,7 @@ import Chat from "@/components/ScrollingChat";
 import supabase from "@/utils/supabase";
 import './page.css';
 
-const summary_options = ["policies", "dates", "summary", "resources", "instructors"];
+const summary_options = ["Policies", "Dates", "Summary", "Resources", "Instructors"];
 const kpi_options = ["course_instructors", "office_hours", "lectures", "description", "learning_objectives", "prerequisites"];
 const kpiHighlightMapping = {
   course_instructors: "Eshan Chattopadhyay",
@@ -426,13 +426,23 @@ const Home: React.FC<HomeProps> = (props) => {
             </button>
           </div>
         )} */}
-        {Object.values(options).some(value => value) && !isProcessing && firstFile !== null && (
+        {/* {Object.values(options).some(value => value) && !isProcessing && firstFile !== null && (
           <div className="flex flex-col items-center justify-center">
-            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded mt-4" onClick={onSubmitParse}>
+            <button className="gray text-white font-bold py-2 px-4 rounded mt-4" onClick={onSubmitParse}>
               Submit
             </button>
           </div>
-        )}
+        )} */}
+        {
+          !isProcessing && firstFile !== null && (
+            <div className="flex flex-col items-center justify-center">
+              <button className={`${Object.values(options).some(value => value) ? "selected-background" : "default-background"} text-white font-bold py-2 px-4 rounded mt-4`} onClick={onSubmitParse}>
+                Submit
+              </button>
+
+            </div>
+          )
+        }
         {/* <div className="overflow-x-scroll overflow-y-hidden max-w-screen-lg mt-10 max-h-80">
           <div className="flex flex-no-wrap max-h-96">
             {Object.entries(messages).map(([key, message], index) =>
