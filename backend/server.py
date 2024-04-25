@@ -12,7 +12,7 @@ from flask import (
 )
 from dotenv import load_dotenv, find_dotenv
 import werkzeug
-from sum_doc import main
+from sum_doc import main, follow_up
 from compare_docs import compare_docs
 from flask_cors import CORS
 from gcal_integration import CalendarClient, CredentialsPayload
@@ -82,6 +82,15 @@ def compare():
             yield response
 
     return Response(generate(), mimetype="text/event-stream")
+
+
+@server.route("/followup", methods=["POST"])
+def followup():
+    data = request.get_json()
+    content = data.get("doc")
+    query = data.get("query")
+    resp = follow_up(content, query)
+    return jsonify(resp)
 
 
 client = CalendarClient(API_CLIENT_ID, API_CLIENT_SECRET, SCOPES)

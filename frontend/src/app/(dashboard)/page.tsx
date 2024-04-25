@@ -102,7 +102,6 @@ const Home: React.FC<HomeProps> = (props) => {
         if (event.origin !== process.env.NEXT_PUBLIC_SERVER_URL) return;
 
         if (event.data.type === "authentication") {
-          console.log("Received credentials:", event.data.data);
           localStorage.setItem("gCalCreds", JSON.stringify(event.data.data));
         }
       },
@@ -323,7 +322,7 @@ const Home: React.FC<HomeProps> = (props) => {
             </button>
           </div>
         )}
-        <div className="overflow-x-scroll overflow-y-hidden max-w-screen-lg mt-10 max-h-80">
+        {/* <div className="overflow-x-scroll overflow-y-hidden max-w-screen-lg mt-10 max-h-80">
           <div className="flex flex-no-wrap max-h-96">
             {Object.entries(messages).map(([key, message], index) =>
               key === "dates" ? null : (
@@ -346,6 +345,17 @@ const Home: React.FC<HomeProps> = (props) => {
             )}
           </div>
         </div>
+ */}
+        {/* <ScrollingChat
+          fileContent={firstFileContent}
+          message={Object.values(messages).map((msg) => ({
+            message: msg,
+            sentTime: new Date().toISOString(),
+            sender: "Support",
+            direction: "incoming",
+            position: "single",
+          }))}
+        /> */}
 
         <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
           <DialogContent>
