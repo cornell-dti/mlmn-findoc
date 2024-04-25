@@ -8,7 +8,6 @@ export default function Home() {
   const { data: session } = useSession();
   return (
     <>
-=======
       <div className="min-h-screen bg-mainContent">
         <div className="w-full px-52 pt-52">
           <p className="text-left text-5xl  font-normal text-white">Welcome, {session?.user?.name}!</p>
@@ -21,13 +20,13 @@ export default function Home() {
             <button className="w-80 h-32 rounded-lg shadow bg-buttonColor hover:bg-hoverColor">
               <span className="w-full h-full flex flex-col justify-center items-left text-white text-left text-lg font-medium px-12">
                 Summarize
-                <span className="text-sm">to get important info</span>
+                <span className="text-sm">to extract important data</span>
               </span>
             </button>
           </Link>
 
           <Link href="/chat/parse">
-            <button className="w-80 h-32 rounded-lg shadow bg-buttonColor hover:bg-hoverColor">
+          <button className="w-80 h-32 rounded-lg shadow bg-buttonColor hover:bg-hoverColor">
               <span className="w-full h-full flex flex-col justify-center items-left text-white text-left text-lg font-medium px-12">
                 Parse
                 <span className="text-sm">from syllabus</span>
@@ -36,10 +35,10 @@ export default function Home() {
           </Link>
 
           <Link href="/chat/compare">
-            <button className="w-88 h-32 rounded-lg shadow bg-buttonColor hover:bg-hoverColor">
+            <button className="w-80 h-32 rounded-lg shadow bg-buttonColor hover:bg-hoverColor">
               <span className="w-full h-full flex flex-col justify-center items-left text-white text-left text-lg font-medium px-12">
-                Compare with another file
-                <span className="text-sm">from financial reports & documents</span>
+                Compare
+                <span className="text-sm">with another file</span>
               </span>
             </button>
           </Link>
