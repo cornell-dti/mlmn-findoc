@@ -2,6 +2,10 @@
   background-color: #0D509D;
 }
 
-.background-click {
+.default-background {
   background-color: #695E5E;
+}
+
+.selected-background {
+  background-color: #0D509D;
 }
