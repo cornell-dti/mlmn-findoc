@@ -106,6 +106,11 @@ const Home: React.FC<HomeProps> = (props) => {
     });
   };
 
+  const onSubmitParse = (event: React.MouseEvent<HTMLButtonElement>) => {
+    // Handle the submission logic here
+  };
+
+
   const handlekpiOptionChange = (kpioption: string) => {
     setkpiOptions({
       ...kpioptions,
@@ -247,17 +252,18 @@ const Home: React.FC<HomeProps> = (props) => {
       <div className="flex flex-col items-center justify-center h-full pt-2">
         <h1 className="text-4xl text-white mb-6">
           {isSummarize ? "What do you want to summarize?" : ""}
-          {isParse ? "What do you want to parse?" : ""}
+          {(!firstFileContent && isParse) ? "What do you want to parse?" : ""}
           {isCompare ? "What do you want to compare?" : ""}
+          {(firstFileContent && isParse) ? "Select all information you want to parse" : ""}
         </h1>
 
 
-        {isParse ? (
+        {(firstFileContent && isParse) ? (
           <div className="flex justify-center gap-5 w-full" style={{ marginBottom: "20px" }}>
             {summary_options.map((option, index) => (
               <div key={index}
                 onClick={() => handleOptionChange(option)}
-                className={`rounded-md shadow cursor-pointer p-4 transition-colors duration-300 ${options[option] ? "background-click" : "default-background"} border border-gray-200 flex flex-col items-center justify-center flex-grow`}
+                className={`rounded-md shadow cursor-pointer p-4 transition-colors duration-300 ${options[option] ? "selected-background" : "default-background"} border border-gray-200 flex flex-col items-center justify-center flex-grow`}
                 style={{ width: '150px', height: '75px', minWidth: '150px', minHeight: '75px', maxWidth: '150px', maxHeight: '75px' }}
               >
                 <div className="text-white text-lg font-medium">
@@ -270,10 +276,37 @@ const Home: React.FC<HomeProps> = (props) => {
           ""
         )}
 
-
+        {((!firstFileContent && isParse) || isSummarize || isCompare) ? (
+          <div className="flex w-full justify-center gap-4 mb-4">
+            <div
+              className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${isProcessing ? ".default-background" : ".default-background"
+                } max-w-sm`}
+            >
+              <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
+                <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
+                  <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
+                  {(uploadedFileName) ? (
+                    <span className="text-sm text-blue-500">{uploadedFileName}</span>
+                  ) : (
+                    <label className="text-sm -mb-2">Upload first file</label>
+                  )}
+                </div>
+                {!uploadedFileName && (
+                  <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
+                    Drag and drop <br />
+                    or choose a file to upload
+                  </span>
+                )}
+              </label>
+              <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
+            </div>
+          </div>
+        ) : (
+          ""
+        )}
 
         <div className="flex w-full flex-col justify-center gap-4 mb-4">
-          <div className="flex w-full justify-center gap-4 mb-4">
+          {/* <div className="flex w-full justify-center gap-4 mb-4">
             <div
               className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${isProcessing ? "bg-gray-200" : "bg-transparent"
                 } max-w-sm`}
@@ -295,13 +328,8 @@ const Home: React.FC<HomeProps> = (props) => {
                 )}
               </label>
               <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
-
             </div>
-
-
-
-
-          </div>
+          </div> */}
 
           {isSummarize ? (
             <>
@@ -391,15 +419,20 @@ const Home: React.FC<HomeProps> = (props) => {
           ""
         )}
         {isProcessing && <h2 className="text-white text-lg">Processing...</h2>}
-        {
-          options.dates && !isProcessing && firstFile !== null && (
-            <div className="flex flex-col items-center justify-center">
-              <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded mt-4" onClick={onExportClick}>
-                Export to Google Calendar
-              </button>
-            </div>
-          )
-        }
+        {/* {options.dates && !isProcessing && firstFile !== null && (
+          <div className="flex flex-col items-center justify-center">
+            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded mt-4" onClick={onExportClick}>
+              Export to Google Calendar
+            </button>
+          </div>
+        )} */}
+        {Object.values(options).some(value => value) && !isProcessing && firstFile !== null && (
+          <div className="flex flex-col items-center justify-center">
+            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded mt-4" onClick={onSubmitParse}>
+              Submit
+            </button>
+          </div>
+        )}
         {/* <div className="overflow-x-scroll overflow-y-hidden max-w-screen-lg mt-10 max-h-80">
           <div className="flex flex-no-wrap max-h-96">
             {Object.entries(messages).map(([key, message], index) =>
@@ -422,20 +455,8 @@ const Home: React.FC<HomeProps> = (props) => {
               )
             )}
           </div>
-        </div>
- */}
-        {/* <ScrollingChat
-          fileContent={firstFileContent}
-          message={Object.values(messages).map((msg) => ({
-            message: msg,
-            sentTime: new Date().toISOString(),
-            sender: "Support",
-            direction: "incoming",
-            position: "single",
-          }))}
-        /> */}
-
-        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+        </div> */}
+        {/* <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
           <DialogContent>
             <IconButton aria-label="close" onClick={handleCloseDialog} style={{ position: "absolute", right: 8, top: 8 }}>
               <CloseIcon />
@@ -444,25 +465,25 @@ const Home: React.FC<HomeProps> = (props) => {
               <FormattedMessage message={dialogContent.text} />
             </div>
           </DialogContent>
-        </Dialog>
-      </div >
+        </Dialog> */}
+      </div>
 
-      <h3 className="text-4xl text-white mb-6" style={{ marginTop: "30px" }}>
+      {/* <h3 className="text-4xl text-white mb-6" style={{ marginTop: "30px" }}>
         Uploaded File Preview
-      </h3>
+      </h3> */}
       {firstFileContent && (
         <div className="file-preview-container">
           <div
-            className="file-preview-header"
-            style={{
-              backgroundColor: "#33302F",
-              border: "1px solid #D1D5DB",
-              borderTopLeftRadius: 10,
-              borderTopRightRadius: 10,
-              padding: "15px 10px",
-            }}
+          // className="file-preview-header"
+          // style={{
+          //   backgroundColor: "#33302F",
+          //   border: "1px solid #D1D5DB",
+          //   borderTopLeftRadius: 10,
+          //   borderTopRightRadius: 10,
+          //   padding: "15px 10px",
+          // }}
           >
-            Uploaded File Preview: {uploadedFileName}
+
             {/* {kpi_options.map((option, index) => (
               <div key={index} className="flex items-center gap-1" style={{ margin: "10px 10px" }}>
                 <input
@@ -480,10 +501,10 @@ const Home: React.FC<HomeProps> = (props) => {
             ))} */}
           </div>
           <div
-            className="file-preview-content mt-4 p-4 bg-white bg-opacity-10 text-white overflow-y-auto max-h-96 w-full"
-            style={{ marginTop: 0, border: "1px solid #D1D5DB", resize: "vertical" }}
+          // className="file-preview-content mt-4 p-4 bg-white bg-opacity-10 text-white overflow-y-auto max-h-96 w-full"
+          // style={{ marginTop: 0, border: "1px solid #D1D5DB", resize: "vertical" }}
           >
-            <pre>
+            {/* <pre>
               {
                 // Replace 'highlightedSubstring' with the actual text you want to highlight
                 firstFileContent
@@ -507,7 +528,7 @@ const Home: React.FC<HomeProps> = (props) => {
                       : [...prev, current];
                   }, [])
               }
-            </pre>
+            </pre> */}
           </div>
         </div>
       )}
