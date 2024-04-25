@@ -1,0 +1,72 @@
+/* Change background color of message list and its border */
+.cs-message-list {
+  background-color: #231F1E; /* Dark background color for the message list */
+  border-color: #231F1E; /* Dark border color */
+}
+
+/* Change background color of chat container */
+.cs-chat-container {
+  background-color: #1E72FF; /* Blue background color for the chat container */
+  border-color: #231F1E; /* Dark border color for the chat container */
+}
+
+/* Apply background and border color to the main container */
+.cs-main-container {
+  background-color: #1E72FF; /* Blue background color for the main container */
+  border-color: #231F1E; /* Dark border color for the main container */
+}
+
+/* Style the message input and its border */
+div.cs-message-input {
+  background-color: #231F1E; /* Dark background color for the message input */
+  border-color: #1E72FF; /* Blue border color for the message input */
+}
+
+/* Style the inner input field where the user types the message */
+.cs-message-input__input {
+  background-color: #1E72FF; /* Blue background color for the typing area */
+}
+
+/* Style the send button (paper plane icon) */
+.cs-button-cs-button--send svg {
+  fill: #1E72FF; /* Blue color for the send icon */
+}
+
+/* Ensure the editor wrapper matches the message input */
+.cs-message-input__content-editor-wrapper {
+  background-color: #1E72FF; /* Blue background color for the content editor wrapper */
+}
+
+.cs-message-input__content-editor {
+  color: #FFFFFF
+}
+
+/* Style the individual message content */
+.cs-message__content {
+  background-color: #1E72FF; /* Blue background color for message content */
+  color: #1E72FF; /* Blue background color for message content */
+}
+
+.cs-message-input__content-editor::before {
+  background-color: #1E72FF; /* Blue background color for the content editor */
+}
+
+.main-container {
+  width: 100%; /* Full width */
+  height: 500px; /* Custom height, adjust as needed */
+}
+
+/* Chat container to take full height of MainContainer minus MessageInput height */
+.chat-container {
+  height: calc(100% - 40px); /* Assuming MessageInput height of 40px */
+}
+
+/* Message list should take up all remaining space */
+.message-list {
+  height: calc(100% - 50px); /* Adjust based on your needs */
+}
+
+/* Fixed height for MessageInput */
+.message-input {
+  height: 40px;
+}

@@ -1,6 +1,6 @@
 import React from "react";
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
-// import styles from "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
+import "./chatStyles.css";  // Make sure this import path is correct
 import {
   MainContainer,
   ChatContainer,
@@ -9,7 +9,7 @@ import {
   MessageInput,
 } from "@chatscope/chat-ui-kit-react";
 
-function ChatComponent({message}: { message: any }) {
+function ChatComponent({ message }: { message: any }) {
   return (
     <div style={{ position: "relative", height: "500px" }}>
       <MainContainer>
@@ -25,9 +25,9 @@ function ChatComponent({message}: { message: any }) {
                 position: "single",
               }}
             />
-            {/* ... other messages */}
+            {/* You can add more Message components here based on your state or props */}
           </MessageList>
-          <MessageInput placeholder="Placeholder message" />
+          <MessageInput placeholder="Type message here" />
         </ChatContainer>
       </MainContainer>
     </div>
