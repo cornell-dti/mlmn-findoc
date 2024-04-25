@@ -4,6 +4,7 @@ from dotenv import load_dotenv, find_dotenv
 from sample_files.syllabi import CS_2800_SP22, CS_2110
 import os
 import time
+from supabase_client import *
 
 from milvus_abstraction import (
     DocumentSchema,
@@ -62,9 +63,10 @@ def insert_qa(query: str, answer: str, documentId: int):
         documentId=documentId,
         timestamp=timestamp,
     )
-    MilvusInteraction(client=client, collectionName="QuestionAnswerCollection").insert(
+    query_id = MilvusInteraction(client=client, collectionName="QuestionAnswerCollection").insert(
         q_schema
     )
+    return query_id
 
 # client.delete("DocumentCollection", ids=0)
 # client.insert("DocumentCollection", data=test_data_dict)
