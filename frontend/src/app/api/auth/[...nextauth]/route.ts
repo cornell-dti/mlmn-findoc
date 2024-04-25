@@ -14,10 +14,10 @@ const handler = NextAuth({
                 params: {
                     prompt: "consent",
                     access_type: "offline",
-                    response_type: "code",
-                },
-            },
-        }),
+                    response_type: "code"
+                }
+            }
+        })
     ],
     callbacks: {
         async signIn({ user, account, profile, email, credentials }) {

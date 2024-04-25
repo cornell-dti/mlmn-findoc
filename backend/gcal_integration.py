@@ -68,6 +68,7 @@ class CalendarClient:
             )
             service = self._build_service(credentials)
             now = datetime.datetime.utcnow().isoformat() + "Z"  # 'Z' indicates UTC time
+            print(f"Getting the upcoming {n} events")
             events_result = (
                 service.events()
                 .list(
