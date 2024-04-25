@@ -50,7 +50,7 @@ class MilvusInteraction:
         self.collectionName = collectionName
         self.client = client
 
-    def insert(self, schema: DocumentSchema | QuestionSchema):
+    def insert(self, schema: (DocumentSchema | QuestionSchema)):
         response = self.client.insert(self.collectionName, data=schema.schemaToDict())
         return response["ids"][0]
 

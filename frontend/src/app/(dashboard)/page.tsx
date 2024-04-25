@@ -94,34 +94,35 @@ const Home: React.FC<HomeProps> = (props) => {
     });
   };
 
-  window.addEventListener(
-    "message",
-    (event) => {
-      if (event.origin !== "http://localhost:8080") return;
+  useEffect(() => {
+    window.addEventListener(
+      "message",
+      (event) => {
+        if (event.origin !== process.env.NEXT_PUBLIC_SERVER_URL) return;
 
-      if (event.data.type === "authentication") {
-        console.log("Received credentials:", event.data.data);
-        localStorage.setItem("gCalCreds", JSON.stringify(event.data.data));
-      }
-    },
-    false
-  );
+        if (event.data.type === "authentication") {
+          console.log("Received credentials:", event.data.data);
+          localStorage.setItem("gCalCreds", JSON.stringify(event.data.data));
+        }
+      },
+      false
+    );
+  }, []);
 
   const onExportClick = async () => {
     const dates = JSON.parse(messages["dates"]);
     const credentials = JSON.parse(localStorage.getItem("gCalCreds")!);
-    console.log("credentials:", credentials);
     if (!credentials || !areCredentialsValid(credentials)) {
       window.open(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth`, "_blank");
     } else {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/export`, {
+      await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/export`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ dates, credentials, userEmail }),
       });
-      console.log("Export response:", await response.json());
+      localStorage.removeItem("gCalCreds");
     }
   };
 
