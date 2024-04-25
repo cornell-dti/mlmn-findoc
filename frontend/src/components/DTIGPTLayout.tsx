@@ -9,9 +9,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const getDocs = async () => {
+    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/get_docs?user_id=9`, {
+      method: "GET",
+    });
+  };
+
   const dummyHistory : string[] = ["File 1", "File 2", "File 3"];
 
   const toggleSidebar = () => {
+    console.log(getDocs())
     setSidebarOpen(!sidebarOpen);
   };
 
