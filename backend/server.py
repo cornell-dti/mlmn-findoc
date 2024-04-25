@@ -1,5 +1,16 @@
 import os
+import os
 import json
+from flask import (
+    Flask,
+    redirect,
+    render_template_string,
+    request,
+    jsonify,
+    Response,
+    session,
+    url_for,
+)
 from flask import (
     Flask,
     redirect,
@@ -22,13 +33,24 @@ from supabase_client import get_docs_by_user, get_queries_by_user
 from typing import Optional
 
 load_dotenv(find_dotenv(), override=True)
+load_dotenv(find_dotenv(), override=True)
 
 server = Flask(__name__)
 
 server.secret_key = os.environ.get("SECRET_KEY")
 server.config["SESSION_TYPE"] = "filesystem"
 
+
+server.secret_key = os.environ.get("SECRET_KEY")
+server.config["SESSION_TYPE"] = "filesystem"
+
 CORS(server)
+
+os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
+CALLBACK_URL = os.environ.get("CALLBACK_URL")
+API_CLIENT_ID = os.environ.get("API_CLIENT_ID")
+API_CLIENT_SECRET = os.environ.get("API_CLIENT_SECRET")
+SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
 CALLBACK_URL = os.environ.get("CALLBACK_URL")
@@ -118,6 +140,7 @@ def callback():
         "client_secret": credentials.client_secret,
         "scopes": credentials.scopes,
     }
+    print(session["credentials"])
     return render_template_string(
         """
         <html>
@@ -146,6 +169,12 @@ def auth():
 
 @server.route("/export", methods=["POST"])
 def export_to_gcal():
+    credentials_payload = is_authenticated()
+    if not credentials_payload:
+        data = request.get_json()
+        credentials_payload = data.get("credentials")
+        if not credentials_payload:
+            return jsonify("Not authenticated with Google Calendar"), 401
     credentials_payload = is_authenticated()
     if not credentials_payload:
         data = request.get_json()
