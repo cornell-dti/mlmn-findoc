@@ -94,18 +94,20 @@ const Home: React.FC<HomeProps> = (props) => {
     });
   };
 
-  window.addEventListener(
-    "message",
-    (event) => {
-      if (event.origin !== "http://localhost:8080") return;
+  useEffect(() => {
+    window.addEventListener(
+      "message",
+      (event) => {
+        if (event.origin !== "http://localhost:8080") return;
 
-      if (event.data.type === "authentication") {
-        console.log("Received credentials:", event.data.data);
-        localStorage.setItem("gCalCreds", JSON.stringify(event.data.data));
-      }
-    },
-    false
-  );
+        if (event.data.type === "authentication") {
+          console.log("Received credentials:", event.data.data);
+          localStorage.setItem("gCalCreds", JSON.stringify(event.data.data));
+        }
+      },
+      false
+    );
+  }, []);
 
   const onExportClick = async () => {
     const dates = JSON.parse(messages["dates"]);
@@ -113,13 +115,14 @@ const Home: React.FC<HomeProps> = (props) => {
     if (!credentials || !areCredentialsValid(credentials)) {
       window.open(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth`, "_blank");
     } else {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/export`, {
+      await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/export`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ dates, credentials, userEmail }),
       });
+      localStorage.removeItem("gCalCreds");
     }
   };
 
