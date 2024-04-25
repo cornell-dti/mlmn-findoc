@@ -31,9 +31,15 @@ from datetime import datetime
 from beautiful_date import Jan, Apr, BeautifulDate
 from supabase_client import get_docs_by_user, get_queries_by_user
 from typing import Optional
+from supabase import create_client, Client
+from supabase_client import *
 
 load_dotenv(find_dotenv(), override=True)
 load_dotenv(find_dotenv(), override=True)
+
+# supabase_url: str = os.getenv("SUPABASE_URL")
+# supabase_key: str = os.getenv("SUPABASE_KEY")
+# supabase_client: Client = create_client(supabase_url, supabase_key)
 
 server = Flask(__name__)
 
@@ -225,6 +231,22 @@ def get_queries():
     queries = get_queries_by_user(user_id)
     return jsonify(queries), 200
 
+@server.route("/get_docs", methods=["GET"])
+def get_docs():
+    user_id = request.args.get("userID")
+    if not user_id:
+        return Response("User ID is required", status=400)
+    docs = get_docs_by_user(user_id=user_id)
+    print(type(docs))
+    return docs, 200
+
+@server.route("/get_queries", methods=["GET"])
+def get_queries():
+    user_id = request.args.get("userID")
+    if not user_id:
+        return Response("User ID is required", status=400)
+    queries = get_docs_by_user(user_id=user_id)
+    return queries, 200
 
 if __name__ == "__main__":
     server.run(
