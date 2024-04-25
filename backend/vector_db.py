@@ -78,7 +78,7 @@ def get_qa_by_user(user_id: str, doc_id: str):
     ).getQAbyID(question_ids=query_ids, doc_id=doc_id)
 
 
-print(get_qa_by_user("9", 448985163764903046))
+# print(get_qa_by_user("9", 448985163764903046))
 # client.delete("DocumentCollection", ids=0)
 # client.insert("DocumentCollection", data=test_data_dict)
 # print(client.get("DocumentCollection", ids=1))

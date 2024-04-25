@@ -76,11 +76,9 @@ def get_instructors(doc: str):
 
 def follow_up(doc: str, query: str):
     return do_task(
+        doc,
+        FOLLOW_UP_SYSTEM_PROMPT.format(doc=doc),
         query,
-        "You are an AI designed to answer questions based on the provided document. Please answer the following question based on the document content:\n\n Document: {doc}".format(
-            doc=doc, text=query
-        ),
-        FOLLOW_UP_SYSTEM_PROMPT.format(doc=doc, text=query),
     )
 
 
@@ -127,10 +125,6 @@ def streamlit():
 
 
 if __name__ == "__main__":
-    # print(
-    #     do_task(CS_2800_SP22, SUMMARIZE_SYSTEM_PROMPT_SYLLABUS, SUMMARIZE_HUMAN_PROMPT)
-    # )
-    print(
-        do_task(CS_2800_SP22, BACKEND_DATES_SYSTEM_PROMPT, BACKEND_DATES_HUMAN_PROMPT)
-    )
+    # print(do_task(CS_2110, SUMMARIZE_SYSTEM_PROMPT_SYLLABUS, SUMMARIZE_HUMAN_PROMPT))
+    print(do_task(CS_2110, BACKEND_DATES_SYSTEM_PROMPT, BACKEND_DATES_HUMAN_PROMPT))
     # streamlit()
