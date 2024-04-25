@@ -1,4 +1,4 @@
-from pymilvus import MilvusClient
+from pymilvus import MilvusClient, Collection
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv, find_dotenv
 from sample_files.syllabi import CS_2800_SP22, CS_2110
@@ -95,3 +95,13 @@ def insert_qa(query: str, answer: str, documentId: int):
 
 
 # print(process_query(syllabus, "What class is this from?"))
+
+def main():
+    lst = client.query("DocumentCollection",expr="documentId > 0")
+    print(lst)
+    client.delete("DocumentCollection", ids=lst)
+    q_list = client.query("QuestionAnswerCollection",filter="questionId > 0")
+    client.delete("QuestionAnswerCollection", ids=q_list)
+
+if __name__ == "__main__":
+    main()
