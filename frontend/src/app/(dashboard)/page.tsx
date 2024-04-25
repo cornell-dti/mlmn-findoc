@@ -49,6 +49,8 @@ const Home: React.FC<HomeProps> = (props) => {
   const [secondFileName, setSecondFileName] = useState<string>("");
   const [firstFile, setFirstFile] = useState<File | null>(null);
   const [firstFileContent, setFirstFileContent] = useState("");
+  const [savedDocumentName, setSavedDocumentName] = useState("");
+  const [submitDisabled, setSubmitDisabled] = useState<boolean>(true);
   const [userEmail, setUserEmail] = useState<string>("");
   const [highlightedContent, setHighlightedContent] = useState([]);
   const [highlightPattern, setHighlightPattern] = useState<RegExp | null>(null);
@@ -78,6 +80,15 @@ const Home: React.FC<HomeProps> = (props) => {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
+  };
+
+  const handleDocumentNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSavedDocumentName(event.target.value);
+  };
+
+  const handleSubmitButton = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    console.log(savedDocumentName);
   };
 
   const handleOptionChange = (option: string) => {
@@ -170,6 +181,7 @@ const Home: React.FC<HomeProps> = (props) => {
       };
 
       try {
+        setSubmitDisabled(false);
         const response = await uploadFile(files[0], "summarize", options);
         await processResponse(response, setMessages);
       } catch (error) {
@@ -285,7 +297,7 @@ const Home: React.FC<HomeProps> = (props) => {
             </>
           ) : (
             ""
-          )}
+          )} 
 
           {uploadedFileName && (
             <div
@@ -314,6 +326,34 @@ const Home: React.FC<HomeProps> = (props) => {
           )}
         </div>
 
+          {isSummarize || isParse ? (
+          <>
+            <div className="flex flex-col items-center mt-4">
+              <label htmlFor="document-name" className="text-white font-bold mb-2">
+                What do you want to call this document?
+              </label>
+              <input
+                id="document-name"
+                type="text"
+                placeholder="Enter Here"
+                value={savedDocumentName}
+                onChange={handleDocumentNameChange}
+                className="text-black w-3/4 px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 text-sm"
+              />
+              <button
+                type="submit"
+                onClick={handleSubmitButton}
+                disabled={submitDisabled}
+                className={`mt-3 w-3/4 bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm ${
+                  !submitDisabled ? 'hover:bg-blue-700' : 'opacity-80 cursor-not-allowed'
+                }`}              >
+                Submit
+              </button>
+            </div>
+          </>
+        ) : (
+          ""
+        )}
         {isProcessing && <h2 className="text-white text-lg">Processing...</h2>}
         {options.dates && !isProcessing && firstFile !== null && (
           <div className="flex flex-col items-center justify-center">
