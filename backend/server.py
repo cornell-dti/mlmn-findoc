@@ -215,39 +215,6 @@ def export_to_gcal():
 
     return jsonify({"message": "Events successfully exported to Google Calendar"}), 200
 
-@server.route("/get_docs", methods=["GET"])
-def get_docs():
-    user_id = request.args.get("user_id")
-    if not user_id:
-        return Response("User ID is required", status=400)
-    docs = get_docs_by_user(user_id)
-    return jsonify(docs), 200
-
-@server.route("/get_queries", methods=["GET"])
-def get_queries():
-    user_id = request.args.get("user_id")
-    if not user_id:
-        return Response("User ID is required", status=400)
-    queries = get_queries_by_user(user_id)
-    return jsonify(queries), 200
-
-@server.route("/get_docs", methods=["GET"])
-def get_docs():
-    user_id = request.args.get("userID")
-    if not user_id:
-        return Response("User ID is required", status=400)
-    docs = get_docs_by_user(user_id=user_id)
-    print(type(docs))
-    return docs, 200
-
-@server.route("/get_queries", methods=["GET"])
-def get_queries():
-    user_id = request.args.get("userID")
-    if not user_id:
-        return Response("User ID is required", status=400)
-    queries = get_docs_by_user(user_id=user_id)
-    return queries, 200
-
 if __name__ == "__main__":
     server.run(
         host="0.0.0.0" if os.environ.get("ENV") == "production" else "localhost",

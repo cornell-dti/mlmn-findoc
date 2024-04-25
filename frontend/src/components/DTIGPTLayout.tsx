@@ -1,25 +1,37 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import pages from "@/utils/pages";
 import { useSession, signOut } from "next-auth/react";
+import supabase from "@/utils/supabase";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  async function getFileHistory(): Promise<string[]> {
+    const response = await supabase
+        .from("user-doc")
+        .select("*")
+        .eq("userID", 9);
 
-  const getDocs = async () => {
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/get_docs?userID=9`, {
-      method: "GET",
-    }).then((response) => console.log(response));
-  };
+    // Map the response data to extract the "docID" values
+    return response.data?.map(val => val["docID"]) as string[];
+  }
 
-  const dummyHistory : string[] = ["File 1", "File 2", "File 3"];
+  const [files, setFiles] = useState<string[]>([]);
 
-  const toggleSidebar = () => {
-    getDocs()
+  useEffect(() => {
+    const fetchFileHistory = async () => {
+      const fileHistory = await getFileHistory();
+      setFiles(fileHistory);
+    };
+
+    fetchFileHistory();
+  }, []);
+  
+  const toggleSidebar = async () => {
     setSidebarOpen(!sidebarOpen);
   };
 
@@ -49,7 +61,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </div>
         <nav className="flex flex-col p-4">
           <div className={"text-white"}>File History</div>
-          {dummyHistory.map((file) => (<div key={file} className="mt-2 flex items-center relative">
+          {files.map((file) => (<div key={file} className="mt-2 flex items-center relative">
               <Link
                 href="/"
                 className={`block text-gray-300 hover:bg-blue-700 p-2 w-full rounded flex items-center`}
