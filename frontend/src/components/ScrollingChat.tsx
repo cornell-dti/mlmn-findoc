@@ -23,27 +23,27 @@ interface Message {
   timestamp: Date;
 }
 
-// const ScrollingChat = (props: { messages: Message[] }) => {
-//   const { data: session } = useSession();
+const ScrollingChat = (props: { messages: Message[] }) => {
+  const { data: session } = useSession();
 
-//   return (
-//     <div className="flex border-2 border-red-500 relative flex-col w-full h-full text-white">
-//       <p className="text-white text-4xl"> Summary: </p>
-//       <p className="mb-3"> </p>
-//       <Message sender={session?.user?.name!} content="hello" pfp={session?.user?.image!} timestamp={Date.now()} />
-//       <p className="mb-5"> </p>
-//       <Message
-//         sender="chat"
-//         content="hello I am a language model build by DTI"
-//         pfp={"https://avatars.githubusercontent.com/u/19356609?s=280&v=4"}
-//         timestamp={Date.now()}
-//       />
-//       {/* {props.messages.map((msg) => (
-//         <Message key={msg.content} sender={msg.sender} content={msg.content} pfp={msg.pfp} timestamp={msg.timestamp} />
-//       ))} */}
-//     </div>
-//   );
-// };
+  return (
+    <div className="flex border-2 border-red-500 relative flex-col w-full h-full text-white">
+      <p className="text-white text-4xl"> Summary: </p>
+      <p className="mb-3"> </p>
+      <Message sender={session?.user?.name!} content="hello" pfp={session?.user?.image!} timestamp={Date.now()} />
+      <p className="mb-5"> </p>
+      <Message
+        sender="chat"
+        content="hello I am a language model build by DTI"
+        pfp={"https://avatars.githubusercontent.com/u/19356609?s=280&v=4"}
+        timestamp={Date.now()}
+      />
+      {/* {props.messages.map((msg) => (
+        <Message key={msg.content} sender={msg.sender} content={msg.content} pfp={msg.pfp} timestamp={msg.timestamp} />
+      ))} */}
+    </div>
+  );
+};
 
 const Chat = (props: { messages: Message[] }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -64,11 +64,8 @@ const Chat = (props: { messages: Message[] }) => {
   };
 
   const fetchResponse = async (message: string) => {
-    const response = await fetch("")
-
-  // useEffect(() => {
-  //   setMessages(props.messages);
-  // }, [props.messages]);
+    setLoading(true);
+  };
 
   const InputField = () => {
     return (
