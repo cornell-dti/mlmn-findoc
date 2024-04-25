@@ -10,7 +10,7 @@ import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseIcon from "@mui/icons-material/Close";
 import { DialogTitle, IconButton } from "@mui/material";
 import { getSession } from "next-auth/react";
-import ScrollingChat from "@/components/ScrollingChat";
+import Chat from "@/components/ScrollingChat";
 
 const summary_options = ["policies", "dates", "summary", "resources", "instructors"];
 const kpi_options = ["course_instructors", "office_hours", "lectures", "description", "learning_objectives", "prerequisites"];
@@ -347,8 +347,6 @@ const Home: React.FC<HomeProps> = (props) => {
           </div>
         </div>
 
-        <ScrollingChat message={Object.values(messages)} />
-
         <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
           <DialogContent>
             <IconButton aria-label="close" onClick={handleCloseDialog} style={{ position: "absolute", right: 8, top: 8 }}>
@@ -361,6 +359,8 @@ const Home: React.FC<HomeProps> = (props) => {
         </Dialog>
       </div>
 
+      {/* <ScrollingChat message={Object.values(messages)} /> */}
+      <Chat messages={[]} />
       <h3 className="text-4xl text-white mb-6" style={{ marginTop: "30px" }}>
         Uploaded File Preview
       </h3>
