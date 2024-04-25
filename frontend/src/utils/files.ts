@@ -55,21 +55,26 @@ function processDatesResponse(content: string, setMessages: React.Dispatch<React
         ["dates"]: content,
     }));
     const dates = JSON.parse(content);
-    let markdown = "## Events\n\n";
-    console.log(dates);
 
-    for (let event of dates.events) {
-        markdown += `### ${event.summary}\n\n`;
-        markdown += `**Start Date:** ${event.start_datetime}\n\n`;
-        markdown += `**End Date:** ${event.end_datetime}\n\n`;
-        markdown += `**Location:** ${event.location}\n\n`;
-        markdown += `**Description:** ${event.description}\n\n`;
-        markdown += `**Email Reminder Minutes:** ${event.email_reminder_minutes}\n\n`;
+    let markdown = "";
+
+    for (const key in dates) {
+        const items = dates[key];
+        markdown += `## ${key.charAt(0).toUpperCase() + key.slice(1)}\n\n`;
+
+        for (let item of items) {
+            markdown += `### ${item.summary}\n\n`;
+            markdown += `**Start Date:** ${item.start_datetime}\n\n`;
+            markdown += `**End Date:** ${item.end_datetime}\n\n`;
+            markdown += `**Location:** ${item.location ?? 'N/A'}\n\n`;
+            markdown += `**Description:** ${item.description ?? 'No description provided.'}\n\n`;
+            if (item.email_reminder_minutes) {
+                markdown += `**Email Reminder Minutes:** ${item.email_reminder_minutes}\n\n`;
+            }
+        }
     }
 
     return markdown;
 }
-
-
 
 export { uploadFile, processResponse };

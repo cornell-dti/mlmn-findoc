@@ -3,15 +3,19 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import pages from "@/utils/pages";
+import { useSession, signOut } from "next-auth/react";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const dummyHistory : string[] = [];
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
+  const { data: session } = useSession();
 
   return (
     <div className="flex h-screen bg-black">
@@ -26,33 +30,24 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             !sidebarOpen && "rotate-180"
           }`}
         >
-          <img
-            src="/icons/blue-arrow.png"
-            alt="Toggle Sidebar"
-            className="w-6 h-6 text-blue-500"
-          />
+          <img src="/icons/blue-arrow.png" alt="Toggle Sidebar" className="w-6 h-6 text-blue-500" />
         </button>
         <div className="flex items-center p-4 border-b border-gray-800 pt-24">
-          <img
-            src="/dummy/profile.png"
-            alt="User profile"
-            className="rounded-full h-12 w-12 mr-4"
-          />
+          <img src={session?.user?.image!} alt="User profile" className="rounded-full h-12 w-12 mr-4" />
           <div>
             <p className="text-gray-400 text-sm">Welcome 👋</p>
-            <p className="text-white text-lg font-bold">Stanley.</p>
+            <p className="text-white text-md font-bold">{session?.user?.name}</p>
           </div>
         </div>
         <nav className="flex flex-col p-4">
+          <div className={"text-white"}>File History</div>
+          {dummyHistory.map((history) => "")}
+          <div className={"text-white"}>Function</div>
           {pages.map((page) => (
             <div key={page.index} className="mt-2 flex items-center relative">
               {pathname === page.route && (
                 <span className="absolute left-0 ml-[-1.5rem]">
-                  <img
-                    src="/icons/green-pointer.png"
-                    alt="Active Icon"
-                    className="w-6 h-6"
-                  />
+                  <img src="/icons/green-pointer.png" alt="Active Icon" className="w-6 h-6" />
                 </span>
               )}
               <Link
@@ -67,18 +62,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </div>
           ))}
         </nav>
-        <img
-          src="/logos/dti.png"
-          alt="DTI Logo"
-          className="w-max h-max mx-auto border-t border-gray-800 p-4 mt-auto"
-        />
+        <button onClick={() => signOut()} className="bottom-0 left-0 w-full border-solid p-4 text-white text-center">
+          Log Out
+        </button>
+        <img src="/logos/dti.png" alt="DTI Logo" className="w-max h-max mx-auto border-t border-gray-800 p-4 mt-auto" />
       </aside>
-      <div
-        className={`flex-1  transition-margin duration-200 ease-in-out bg-mainContent ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        }`}
-      >
-        <main className="min-h-screen" style={{ backgroundColor: '#231f1e' }}>{children}</main>
+      <div className={`flex-1  transition-margin duration-200 ease-in-out bg-mainContent ${sidebarOpen ? "ml-64" : "ml-0"}`}>
+        <main className="min-h-screen" style={{ backgroundColor: "#231f1e" }}>
+          {children}
+        </main>
       </div>
     </div>
   );

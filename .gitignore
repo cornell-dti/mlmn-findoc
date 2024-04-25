@@ -36,6 +36,7 @@ __pycache__
 *.pyc
 venv
 env
+new_env
 
 # gcal integration
 credentials.json

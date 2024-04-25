@@ -2,16 +2,17 @@
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { uploadFile, processResponse } from "@/utils/files";
+import { areCredentialsValid } from "@/utils/auth";
 import FormattedMessage from "@/components/ResponseFormat";
-import ScrollingMsg from "@/components/ScrollingChat";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseIcon from "@mui/icons-material/Close";
 import { DialogTitle, IconButton } from "@mui/material";
+import { getSession } from "next-auth/react";
 
 const summary_options = ["policies", "dates", "summary", "resources", "instructors"];
-const kpi_options = ["course_instructors", "office_hours", "lectures", "description", "learning_objectives", "prerequisites"]
+const kpi_options = ["course_instructors", "office_hours", "lectures", "description", "learning_objectives", "prerequisites"];
 const kpiHighlightMapping = {
   course_instructors: "Eshan Chattopadhyay",
   office_hours: "Monday 10:30am-11:30am, Thursday 1:30pm-2:30pm.",
@@ -34,19 +35,26 @@ ficiency;`, // Continue the text as necessary
   prerequisites: `The prerequisites for the course are, either having an A- or better in both CS 2800 and CS 2110,
 or having successfully completed all three of CS 2800, CS 2110, and CS 3110. We assume that
 everyone is familiar with the material in CS 2110, CS 3110, and CS 2800, and we will use it as nec-
-essary in CS 4820` // Continue the text as necessary
+essary in CS 4820`, // Continue the text as necessary
 };
 
-export default function Home() {
+interface HomeProps {
+  function: string;
+}
+
+const Home: React.FC<HomeProps> = (props) => {
   const [messages, setMessages] = useState<{ [key: string]: string }>({});
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [uploadedFileName, setUploadedFileName] = useState<string>("");
   const [secondFileName, setSecondFileName] = useState<string>("");
   const [firstFile, setFirstFile] = useState<File | null>(null);
-  const [firstFileContent, setFirstFileContent] = useState('');
+  const [firstFileContent, setFirstFileContent] = useState("");
+  const [userEmail, setUserEmail] = useState<string>("");
   const [highlightedContent, setHighlightedContent] = useState([]);
   const [highlightPattern, setHighlightPattern] = useState<RegExp | null>(null);
-  // const [isChatTrue, setIsChatTrue] = useState<boolean>(false);
+  const isSummarize = props.function === "summarize";
+  const isParse = props.function === "parse";
+  const isCompare = props.function === "compare";
 
   const options_to_use = summary_options.reduce((acc: any, option) => {
     acc[option] = true;
@@ -86,16 +94,43 @@ export default function Home() {
     });
   };
 
-  const onExportClick = async () => {
-    const dates = messages["dates"];
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/export`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+  useEffect(() => {
+    window.addEventListener(
+      "message",
+      (event) => {
+        if (event.origin !== process.env.NEXT_PUBLIC_SERVER_URL) return;
+
+        if (event.data.type === "authentication") {
+          console.log("Received credentials:", event.data.data);
+          localStorage.setItem("gCalCreds", JSON.stringify(event.data.data));
+        }
       },
-      body: dates,
-    });
+      false
+    );
+  }, []);
+
+  const onExportClick = async () => {
+    const dates = JSON.parse(messages["dates"]);
+    const credentials = JSON.parse(localStorage.getItem("gCalCreds")!);
+    if (!credentials || !areCredentialsValid(credentials)) {
+      window.open(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth`, "_blank");
+    } else {
+      await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/export`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ dates, credentials, userEmail }),
+      });
+      localStorage.removeItem("gCalCreds");
+    }
   };
+
+  useEffect(() => {
+    getSession().then((session) => {
+      setUserEmail(session?.user?.email!);
+    });
+  }, []);
 
   useEffect(() => {
     const pattern = createHighlightPattern(kpiHighlightMapping, kpi_options);
@@ -104,18 +139,15 @@ export default function Home() {
 
   function createHighlightPattern(kpiHighlightMapping: any, kpioptions: string[]) {
     const regexParts = Object.entries(kpioptions)
-        .filter(([option, isChecked]) => isChecked && kpiHighlightMapping[option])
-        .map(([option]) => {
-            const textToHighlight = kpiHighlightMapping[option].replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-            return `(${textToHighlight})`;
-        });
-    
+      .filter(([option, isChecked]) => isChecked && kpiHighlightMapping[option])
+      .map(([option]) => {
+        const textToHighlight = kpiHighlightMapping[option].replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+        return `(${textToHighlight})`;
+      });
+
     if (regexParts.length === 0) return null;
-    return new RegExp(regexParts.join('|'), 'gi');
-}
-
-
-  
+    return new RegExp(regexParts.join("|"), "gi");
+  }
 
   const handleFirstFileUpload = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const files = event.target.files;
@@ -124,16 +156,16 @@ export default function Home() {
       setUploadedFileName(files[0].name);
       setFirstFile(files[0]);
       setIsProcessing(true);
-      
+
       const reader = new FileReader();
-      reader.readAsText(files[0]); 
+      reader.readAsText(files[0]);
       reader.onload = async (e) => {
         if (e && e.target && e.target.result) {
           const text = e.target.result.toString();
           setFirstFileContent(text); // Store the content in the state
         } else {
-          console.error('Failed to load the file content.');
-          setFirstFileContent('');
+          console.error("Failed to load the file content.");
+          setFirstFileContent("");
         }
       };
 
@@ -166,12 +198,37 @@ export default function Home() {
     }
   };
 
-  
-
   return (
     <main className="flex flex-col items-center justify-between p-8">
       <div className="flex flex-col items-center justify-center h-full pt-2">
-        <h1 className="text-4xl text-white mb-6">Welcome to dtigpt™ :)</h1>
+        <h1 className="text-4xl text-white mb-6">
+          {isSummarize ? "What do you want to summarize?" : ""}
+          {isParse ? "What do you want to parse?" : ""}
+          {isCompare ? "What do you want to compare?" : ""}
+        </h1>
+
+        {isParse ? (
+          <div className="flex items-center gap-2 text-white" style={{ marginBottom: "20px" }}>
+            {summary_options.map((option, index) => (
+              <div key={index} className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  id={option}
+                  name={option}
+                  checked={options[option]}
+                  onChange={() => handleOptionChange(option)}
+                  className="form-checkbox h-5 w-5 text-blue-600"
+                />
+                <label htmlFor={option} className="text-sm">
+                  {option}
+                </label>
+              </div>
+            ))}
+          </div>
+        ) : (
+          ""
+        )}
+
         <div className="flex w-full justify-center gap-4 mb-4">
           <div
             className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
@@ -196,6 +253,39 @@ export default function Home() {
             </label>
             <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
           </div>
+
+          {isSummarize ? (
+            <>
+              <div className="text-white" style={{ marginTop: "65px" }}>
+                or
+              </div>
+              <div
+                className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
+                  isProcessing ? "bg-gray-200" : "bg-transparent"
+                } max-w-sm`}
+              >
+                <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
+                  <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
+                    <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
+                    {uploadedFileName ? (
+                      <span className="text-sm text-blue-500">{uploadedFileName}</span>
+                    ) : (
+                      <label className="text-sm -mb-2">Upload first file</label>
+                    )}
+                  </div>
+                  {!uploadedFileName && (
+                    <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
+                      Drag and drop <br />
+                      or choose a file to upload
+                    </span>
+                  )}
+                </label>
+                <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
+              </div>
+            </>
+          ) : (
+            ""
+          )}
 
           {uploadedFileName && (
             <div
@@ -224,24 +314,6 @@ export default function Home() {
           )}
         </div>
 
-        <div className="flex items-center gap-2 text-white">
-          {summary_options.map((option, index) => (
-            <div key={index} className="flex items-center gap-1">
-              <input
-                type="checkbox"
-                id={option}
-                name={option}
-                checked={options[option]}
-                onChange={() => handleOptionChange(option)}
-                className="form-checkbox h-5 w-5 text-blue-600"
-              />
-              <label htmlFor={option} className="text-sm">
-                {option}
-              </label>
-            </div>
-          ))}
-        </div>
-
         {isProcessing && <h2 className="text-white text-lg">Processing...</h2>}
         {options.dates && !isProcessing && firstFile !== null && (
           <div className="flex flex-col items-center justify-center">
@@ -250,13 +322,29 @@ export default function Home() {
             </button>
           </div>
         )}
-
-        <div className="scrolling">
-          {}
-          {messages!=null && <ScrollingMsg message={Object.values(messages)} />}
+        <div className="overflow-x-scroll overflow-y-hidden max-w-screen-lg mt-10 max-h-80">
+          <div className="flex flex-no-wrap max-h-96">
+            {Object.entries(messages).map(([key, message], index) =>
+              key === "dates" ? null : (
+                <div className="relative flex-shrink-0 w-1/2 min-w-64 h-64 mt-2" key={index}>
+                  <IconButton
+                    aria-label="expand"
+                    onClick={() => handleOpenDialog(`Response ${key}`, message)}
+                    className="absolute top-2 right-2 text-white bg-gray-500 bg-opacity-100 hover:bg-gray-600"
+                  >
+                    <OpenInFullIcon />
+                  </IconButton>
+                  <h2 className="text-white text-lg">
+                    <mark className="bg-gray-500 text-white px-2 py-1">{`Response ${key}`}</mark>
+                  </h2>
+                  <div className="bg-white bg-opacity-10 mr-4 pb-64 overflow-y-auto max-h-96">
+                    <FormattedMessage key={index} message={message} />
+                  </div>
+                </div>
+              )
+            )}
+          </div>
         </div>
-
-
         <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
           <DialogContent>
             <IconButton aria-label="close" onClick={handleCloseDialog} style={{ position: "absolute", right: 8, top: 8 }}>
@@ -268,48 +356,73 @@ export default function Home() {
           </DialogContent>
         </Dialog>
       </div>
-          
-      <h3 className="text-4xl text-white mb-6" style={{marginTop: '30px'}}>Uploaded File Preview</h3>
-      {firstFileContent && 
-      <div className="file-preview-container"> 
-        <div className="file-preview-header" style={{backgroundColor: '#33302F',border: '1px solid #D1D5DB', borderTopLeftRadius:10 , borderTopRightRadius: 10, padding: '15px 10px'}}>
-          Uploaded File Preview: {uploadedFileName}
-          {kpi_options.map((option, index) => (
-            <div key={index} className="flex items-center gap-1" style={{margin: '10px 10px'}}>
-              <input
-                type="checkbox"
-                id={option}
-                name={option}
-                checked={options[option]}
-                onChange={() => handlekpiOptionChange(option)}
-                className="form-checkbox h-5 w-5 text-blue-600"
-              />
-              <label htmlFor={option} className="text-sm">
-                {option}
-              </label>
-            </div>
-          ))}
-        </div>
-        <div
-      className="file-preview-content mt-4 p-4 bg-white bg-opacity-10 text-white overflow-y-auto max-h-96 w-full"
-      style={{ marginTop: 0, border: '1px solid #D1D5DB', resize: 'vertical' }}
-    >
-      <pre>
-        {
-          // Replace 'highlightedSubstring' with the actual text you want to highlight
-          firstFileContent.split(new RegExp(`(${'Eshan Chattopadhyay'})`, 'gi')).reduce<React.ReactNode[]>((prev, current, index, array) => {
-            // Check if the current segment matches the highlighted text
-            const isMatch = current.toLowerCase() === 'Eshan Chattopadhyay'.toLowerCase();
 
-            // If it's a match, push the highlighted span, otherwise push the current string
-            return isMatch ? 
-              [...prev, <span key={index} style={{ backgroundColor: '#B8AEAB', cursor: 'pointer' }} onClick={() => alert('Substring clicked')}>{current}</span>] : 
-              [...prev, current];
-          }, [])
-        }
-      </pre>
-    </div>
-      </div>}   
+      <h3 className="text-4xl text-white mb-6" style={{ marginTop: "30px" }}>
+        Uploaded File Preview
+      </h3>
+      {firstFileContent && (
+        <div className="file-preview-container">
+          <div
+            className="file-preview-header"
+            style={{
+              backgroundColor: "#33302F",
+              border: "1px solid #D1D5DB",
+              borderTopLeftRadius: 10,
+              borderTopRightRadius: 10,
+              padding: "15px 10px",
+            }}
+          >
+            Uploaded File Preview: {uploadedFileName}
+            {kpi_options.map((option, index) => (
+              <div key={index} className="flex items-center gap-1" style={{ margin: "10px 10px" }}>
+                <input
+                  type="checkbox"
+                  id={option}
+                  name={option}
+                  checked={options[option]}
+                  onChange={() => handlekpiOptionChange(option)}
+                  className="form-checkbox h-5 w-5 text-blue-600"
+                />
+                <label htmlFor={option} className="text-sm">
+                  {option}
+                </label>
+              </div>
+            ))}
+          </div>
+          <div
+            className="file-preview-content mt-4 p-4 bg-white bg-opacity-10 text-white overflow-y-auto max-h-96 w-full"
+            style={{ marginTop: 0, border: "1px solid #D1D5DB", resize: "vertical" }}
+          >
+            <pre>
+              {
+                // Replace 'highlightedSubstring' with the actual text you want to highlight
+                firstFileContent
+                  .split(new RegExp(`(${"Eshan Chattopadhyay"})`, "gi"))
+                  .reduce<React.ReactNode[]>((prev, current, index, array) => {
+                    // Check if the current segment matches the highlighted text
+                    const isMatch = current.toLowerCase() === "Eshan Chattopadhyay".toLowerCase();
+
+                    // If it's a match, push the highlighted span, otherwise push the current string
+                    return isMatch
+                      ? [
+                          ...prev,
+                          <span
+                            key={index}
+                            style={{ backgroundColor: "#B8AEAB", cursor: "pointer" }}
+                            onClick={() => alert("Substring clicked")}
+                          >
+                            {current}
+                          </span>,
+                        ]
+                      : [...prev, current];
+                  }, [])
+              }
+            </pre>
+          </div>
+        </div>
+      )}
     </main>
   );
-} 
+};
+
+export default Home;
