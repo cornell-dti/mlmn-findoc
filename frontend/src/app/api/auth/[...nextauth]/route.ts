@@ -1,10 +1,10 @@
-import NextAuth from "next-auth"
-
+import NextAuth from "next-auth";
+import supabase from "@/utils/supabase";
 import GoogleProvider from "next-auth/providers/google";
 
 const handler = NextAuth({
     pages: {
-        signIn: '/login',
+        signIn: "/login",
     },
     providers: [
         GoogleProvider({
@@ -14,12 +14,27 @@ const handler = NextAuth({
                 params: {
                     prompt: "consent",
                     access_type: "offline",
-                    response_type: "code"
-                }
-            }
-        })
+                    response_type: "code",
+                },
+            },
+        }),
     ],
-    secret: process.env.NEXTAUTH_SECRET
-})
+    callbacks: {
+        async signIn({ user, account, profile, email, credentials }) {
+            // random id for user less than bigint
+            const first_name = user?.name!.split(" ")[0];
+            const last_name = user?.name!.split(" ")[1];
+            const { data, error } = await supabase.from("user").upsert(
+                {
+                    first_name: first_name,
+                    last_name: last_name,
+                    email: user?.email,
+                },
+            );
+            return true;
+        },
+    },
+    secret: process.env.NEXTAUTH_SECRET,
+});
 
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST };
