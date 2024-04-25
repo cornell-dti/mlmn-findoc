@@ -171,4 +171,8 @@ def export_to_gcal():
 
 
 if __name__ == "__main__":
-    server.run(host="localhost", port=8080, debug=True)
+    server.run(
+        host="0.0.0.0" if os.environ.get("ENV") == "production" else "localhost",
+        port=8080,
+        debug=os.environ.get("ENV") != "production",
+    )
