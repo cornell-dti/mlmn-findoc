@@ -110,7 +110,6 @@ const Home: React.FC<HomeProps> = (props) => {
   const onExportClick = async () => {
     const dates = JSON.parse(messages["dates"]);
     const credentials = JSON.parse(localStorage.getItem("gCalCreds")!);
-    console.log("credentials:", credentials);
     if (!credentials || !areCredentialsValid(credentials)) {
       window.open(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth`, "_blank");
     } else {
@@ -121,7 +120,6 @@ const Home: React.FC<HomeProps> = (props) => {
         },
         body: JSON.stringify({ dates, credentials, userEmail }),
       });
-      console.log("Export response:", await response.json());
     }
   };
 
