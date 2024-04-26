@@ -390,7 +390,6 @@ const Home: React.FC<HomeProps> = (props) => {
             </button>
           </div>
         )}
-        )}
         {/* {Object.values(options).some(value => value) && !isProcessing && firstFile !== null && (
           <div className="flex flex-col items-center justify-center">
             <button className="gray text-white font-bold py-2 px-4 rounded mt-4" onClick={onSubmitParse}>
