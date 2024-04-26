@@ -102,6 +102,7 @@ const Chat = (props: { messages: Message[]; doc_id: BigInt }) => {
           pfp={"https://avatars.githubusercontent.com/u/19356609?s=280&v=4"}
           timestamp={Date.now()}
         />
+        {loading && <p>Loading...</p>}
         {messages.map((msg, i) => (
           <Message key={i} sender={msg.sender} content={msg.content} pfp={msg.pfp} timestamp={msg.timestamp.getTime()} />
         ))}

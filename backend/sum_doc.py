@@ -53,7 +53,6 @@ def do_task(doc: str, system_prompt, human_prompt):
             )
     return final_output.content
 
-
 def sum_doc(doc: str):
     return do_task(doc, SUMMARIZE_SYSTEM_PROMPT_SYLLABUS, SUMMARIZE_HUMAN_PROMPT)
 
