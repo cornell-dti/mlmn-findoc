@@ -64,7 +64,6 @@ const Chat = (props: { messages: Message[]; doc_id: number }) => {
     console.log("messages", messages);
   }, [messages]);
 
-
   const InputField = () => {
     return (
       <div className="flex items-center border border-blue-500 rounded-lg overflow-hidden mt-4">
@@ -73,12 +72,12 @@ const Chat = (props: { messages: Message[]; doc_id: number }) => {
           ref={inputRef}
           type="text"
           placeholder="Type a message..."
-          style={{ borderTopLeftRadius: '0.375rem', borderBottomLeftRadius: '0.375rem', borderRight: 'none' }}
+          style={{ borderTopLeftRadius: "0.375rem", borderBottomLeftRadius: "0.375rem", borderRight: "none" }}
         />
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-r-lg"
           onClick={handleSend}
-          style={{ borderTopRightRadius: '0.375rem', borderBottomRightRadius: '0.375rem' }}
+          style={{ borderTopRightRadius: "0.375rem", borderBottomRightRadius: "0.375rem" }}
         >
           Send
         </button>
@@ -86,12 +85,10 @@ const Chat = (props: { messages: Message[]; doc_id: number }) => {
     );
   };
 
-
-
   return (
     <div className="flex flex-col w-full h-full p-4">
       <div className="flex flex-col gap-1 overflow-auto">
-      {/* <div className="flex relative flex-col w-full h-full text-white"> */}
+        {/* <div className="flex relative flex-col w-full h-full text-white"> */}
         {/* <p className="text-white text-4xl mb-4"> Summary: </p> */}
         <p className="mb-3"> </p>
         <Message sender={session?.user?.name!} content="hello" pfp={session?.user?.image!} timestamp={Date.now()} />
