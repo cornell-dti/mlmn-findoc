@@ -375,8 +375,8 @@ const Home: React.FC<HomeProps> = (props) => {
                 type="submit"
                 onClick={handleSubmitButton}
                 disabled={submitDisabled}
-                className={`mt-3 w-3/4 bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm ${
-                  !submitDisabled ? "hover:bg-blue-700" : "opacity-80 cursor-not-allowed"
+                className={`mt-3 w-3/4 bg-buttonColor text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm ${
+                  !submitDisabled ? "hover:bg-hoverColor" : "opacity-80 cursor-not-allowed"
                 }`}
               >
                 Submit
