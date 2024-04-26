@@ -12,36 +12,10 @@ import { DialogTitle, FormControl, IconButton, InputLabel, MenuItem, Select, Sel
 import { getSession } from "next-auth/react";
 import Chat from "@/components/ScrollingChat";
 import supabase from "@/utils/supabase";
-import "./page.css";
 import { TbRuler } from "react-icons/tb";
-import "./page.css";
+import './page.css'
 
-const summary_options = ["Policies", "Dates", "Summary", "Resources", "Instructors"];
-const kpi_options = ["course_instructors", "office_hours", "lectures", "description", "learning_objectives", "prerequisites"];
-const kpiHighlightMapping = {
-  course_instructors: "Eshan Chattopadhyay",
-  office_hours: "Monday 10:30am-11:30am, Thursday 1:30pm-2:30pm.",
-  lectures: "MWF 9:05am-9:55am, Uris Hall G01.",
-  description: `This course develops techniques used in the design and analysis of algorithms, with an empha-
-sis on problems arising in computing applications. Example applications are drawn from sys-
-tems and networks, artificial intelligence, computer vision, data mining, and computational bi-
-ology. This course covers four major algorithm design techniques (greedy algorithms, divide and
-conquer, dynamic programming, and network flow), computability theory focusing on undecid-
-ability, computational complexity focusing on NP-completeness, and algorithmic techniques for
-intractable problems, including identification of structured special cases, approximation algo-
-rithms, and local search heuristics. This course continues to build on work in previous courses
-on proofwriting and asymptotic runtime analysis of algorithms.`,
-  learning_objectives: `On completing this course, students should be able to:
-• Identify problems solvable with a greedy algorithm, design and prove the correctness of
-such an algorithm, and supply asymptotic running time for a variety of given algorithms.
-• Recognize problems to which divide and conquer or dynamic programming approaches
-may apply, design algorithms with these approaches, and analyze their computational ef-
-ficiency;`, // Continue the text as necessary
-  prerequisites: `The prerequisites for the course are, either having an A- or better in both CS 2800 and CS 2110,
-or having successfully completed all three of CS 2800, CS 2110, and CS 3110. We assume that
-everyone is familiar with the material in CS 2110, CS 3110, and CS 2800, and we will use it as nec-
-essary in CS 4820`, // Continue the text as necessary
-};
+const summary_options = ["policies", "dates", "summary", "resources", "instructors"];
 
 interface HomeProps {
   function: string;
@@ -57,11 +31,14 @@ const Home: React.FC<HomeProps> = (props) => {
   const [savedDocumentName, setSavedDocumentName] = useState("");
   const [submitDisabled, setSubmitDisabled] = useState<boolean>(true);
   const [userEmail, setUserEmail] = useState<string>("");
-  const isSummarize = props.function === "summarize";
-  const isParse = props.function === "parse";
-  const isCompare = props.function === "compare";
-  const [file, setFile] = React.useState("");
+  const isSummarize = props.function === "summarize"
+  const isParse = props.function === "parse"
+  const isCompare = props.function === "compare"
+  const [file, setFile] = React.useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+
 
   const options_to_use = summary_options.reduce((acc: any, option) => {
     acc[option] = false;
@@ -89,6 +66,7 @@ const Home: React.FC<HomeProps> = (props) => {
     event.preventDefault();
     console.log(savedDocumentName);
     setIsSubmitted(true);
+    setIsTransitioning(true);
   };
 
   const handleOptionChange = (option: string) => {
@@ -97,11 +75,9 @@ const Home: React.FC<HomeProps> = (props) => {
       [option]: !options[option],
     });
   };
-
   const onSubmitParse = (event: React.MouseEvent<HTMLButtonElement>) => {
     // Handle the submission logic here
   };
-
   useEffect(() => {
     window.addEventListener(
       "message",
@@ -195,10 +171,13 @@ const Home: React.FC<HomeProps> = (props) => {
   };
 
   async function getFileHistory(): Promise<string[]> {
-    const response = await supabase.from("user-doc").select("*").eq("userID", 9);
+    const response = await supabase
+        .from("user-doc")
+        .select("*")
+        .eq("userID", 9);
 
     // Map the response data to extract the "docID" values
-    return response.data?.map((val) => val["docID"]) as string[];
+    return response.data?.map(val => val["docID"]) as string[];
   }
 
   const [files, setFiles] = useState<string[]>([]);
@@ -214,7 +193,14 @@ const Home: React.FC<HomeProps> = (props) => {
 
   return (
     <main className="flex flex-col items-center justify-between p-8">
-      <div className="flex flex-col items-center justify-center h-full pt-2">
+      {!isSubmitted && (
+        <div
+        className={`page-transition ${
+          isTransitioning ? "page-transition-exit-active" : ""
+        }`}
+      >
+
+<div className="flex flex-col items-center justify-center h-full pt-2">
         <h1 className="text-4xl text-white mb-6">
           {isSummarize ? "What do you want to summarize?" : ""}
           {!firstFileContent && isParse ? "What do you want to parse?" : ""}
@@ -224,7 +210,7 @@ const Home: React.FC<HomeProps> = (props) => {
 
         {firstFileContent && isParse ? (
           <div className="flex justify-center gap-5 w-full" style={{ marginBottom: "20px" }}>
-            {summary_options.map((option, index) => (
+          {summary_options.map((option, index) => (
               <div
                 key={index}
                 onClick={() => handleOptionChange(option)}
@@ -240,8 +226,9 @@ const Home: React.FC<HomeProps> = (props) => {
         ) : (
           ""
         )}
-        <div className="flex w-full justify-center gap-4 mb-4">
-          {(!firstFileContent && isParse) || isSummarize || isCompare ? (
+
+<div className="flex w-full justify-center gap-4 mb-4">
+        {((!firstFileContent && isParse) || isSummarize || isCompare) ? (
             <div
               className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
                 isProcessing ? ".default-background" : ".default-background"
@@ -265,10 +252,9 @@ const Home: React.FC<HomeProps> = (props) => {
               </label>
               <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
             </div>
-          ) : (
-            ""
-          )}
-
+        ) : (
+          ""
+        )}
           {isSummarize ? (
             <>
               <div className="text-white" style={{ marginTop: "65px" }}>
@@ -331,10 +317,8 @@ const Home: React.FC<HomeProps> = (props) => {
             </>
           ) : (
             ""
-          )}
-        </div>
+          )} 
 
-        <div className="flex w-full flex-col justify-center gap-4 mb-4">
           {uploadedFileName && isCompare && (
             <div
               className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 bg-transparent ${
@@ -362,7 +346,7 @@ const Home: React.FC<HomeProps> = (props) => {
           )}
         </div>
 
-        {isSummarize || isParse ? (
+          {isSummarize || isParse ? (
           <>
             <div className="flex flex-col items-center mt-4">
               <label htmlFor="document-name" className="text-white font-bold mb-2">
@@ -382,8 +366,7 @@ const Home: React.FC<HomeProps> = (props) => {
                 disabled={submitDisabled}
                 className={`mt-3 w-3/4 bg-buttonColor text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm ${
                   !submitDisabled ? "hover:bg-hoverColor" : "opacity-80 cursor-not-allowed"
-                }`}
-              >
+                }`}              >
                 Submit
               </button>
             </div>
@@ -399,23 +382,6 @@ const Home: React.FC<HomeProps> = (props) => {
             </button>
           </div>
         )}
-        {/* {Object.values(options).some(value => value) && !isProcessing && firstFile !== null && (
-          <div className="flex flex-col items-center justify-center">
-            <button className="gray text-white font-bold py-2 px-4 rounded mt-4" onClick={onSubmitParse}>
-              Submit
-            </button>
-          </div>
-        )} */}
-        {/* {
-          !isProcessing && firstFile !== null && (
-            <div className="flex flex-col items-center justify-center">
-              <button className={`${Object.values(options).some(value => value) ? "selected-background" : "default-background"} text-white font-bold py-2 px-4 rounded mt-4`} onClick={onSubmitParse}>
-                Submit
-              </button>
-
-            </div>
-          )
-        } */}
         {/* <div className="overflow-x-scroll overflow-y-hidden max-w-screen-lg mt-10 max-h-80">
           <div className="flex flex-no-wrap max-h-96">
             {Object.entries(messages).map(([key, message], index) =>
@@ -438,7 +404,19 @@ const Home: React.FC<HomeProps> = (props) => {
               )
             )}
           </div>
-        </div> */}
+        </div>
+ */}
+        {/* <ScrollingChat
+          fileContent={firstFileContent}
+          message={Object.values(messages).map((msg) => ({
+            message: msg,
+            sentTime: new Date().toISOString(),
+            sender: "Support",
+            direction: "incoming",
+            position: "single",
+          }))}
+        /> */}
+
         {/* <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
           <DialogContent>
             <IconButton aria-label="close" onClick={handleCloseDialog} style={{ position: "absolute", right: 8, top: 8 }}>
@@ -450,15 +428,20 @@ const Home: React.FC<HomeProps> = (props) => {
           </DialogContent>
         </Dialog> */}
       </div>
-
-      <h3 className="text-4xl text-white mb-6" style={{ marginTop: "30px" }}>
-        Chat
-      </h3>
-      {/* <Chat messages={[]} doc_id={448985163764905353} /> */}
-      <Chat messages={[]} doc_id={448985163764905483n} />
+      </div>
+      
+      )}
       {isSubmitted && (
-        // {isSubmitted && firstFileContent && (
-        <></>
+        <div className="flex flex-col items-center justify-center h-full">
+          <h3 className="text-4xl text-white mb-6">
+            {isSummarize
+              ? `Summarizing ${uploadedFileName}`
+              : isParse
+              ? `Processing ${uploadedFileName}`
+              : `Comparing ${uploadedFileName} and ${secondFileName}`}
+          </h3>
+          <Chat messages={[]} doc_id={448985163764905353} />
+        </div>
       )}
     </main>
   );
