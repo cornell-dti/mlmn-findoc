@@ -25,9 +25,12 @@ const Home: React.FC<HomeProps> = (props) => {
   const [messages, setMessages] = useState<{ [key: string]: string }>({});
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [uploadedFileName, setUploadedFileName] = useState<string>("");
-  const [secondFileName, setSecondFileName] = useState<string>("");
+  const [secondFileName, setSecondFileName] = useState<string>();
   const [firstFile, setFirstFile] = useState<File | null>(null);
+  const [secondFile, setSecondFile] = useState<File | null>(null);
   const [firstFileContent, setFirstFileContent] = useState("");
+  const [uploadedFiles, setuploadedFiles] = useState<File[]>([]);
+  const [temp, setTemp] = useState<Number>(0.0);
   const [savedDocumentName, setSavedDocumentName] = useState("");
   const [submitDisabled, setSubmitDisabled] = useState<boolean>(true);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -36,6 +39,9 @@ const Home: React.FC<HomeProps> = (props) => {
   const isCompare = props.function === "compare";
   const [file, setFile] = React.useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [output, setOutput] = useState<string>("");
+  const [doneProcessing, setDoneProcessing] = useState<boolean>(false);
+
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [documentID, setDocumentID] = useState<string | null>(null);
 
@@ -126,20 +132,22 @@ const Home: React.FC<HomeProps> = (props) => {
       setMessages({});
       setUploadedFileName(files[0].name);
       setFirstFile(files[0]);
-      setIsProcessing(true);
+      setuploadedFiles([files[0]]);
+    }
+  };
 
-      const reader = new FileReader();
-      reader.readAsText(files[0]);
-      reader.onload = async (e) => {
-        if (e && e.target && e.target.result) {
-          const text = e.target.result.toString();
-          setFirstFileContent(text); // Store the content in the state
-        } else {
-          console.error("Failed to load the file content.");
-          setFirstFileContent("");
-        }
-      };
+  const handleSecondFileUpload = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const files = event.target.files;
+    if (files && files[0] && firstFile) {
+      setSecondFileName(files[0].name);
+      setSecondFile(files[0]);
+      setuploadedFiles([firstFile, files[0]]);
+    }
+  };
 
+  const handleSummarizeSubmit = async () => {
+    setIsProcessing(true);
+    if (firstFile instanceof File) {
       try {
         setSubmitDisabled(false);
         // const response = await uploadFile(files[0], "summarize", options);
@@ -152,21 +160,44 @@ const Home: React.FC<HomeProps> = (props) => {
     }
   };
 
-  const handleSecondFileUpload = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const files = event.target.files;
-    if (files && files[0] && firstFile) {
-      setSecondFileName(files[0].name);
-      setIsProcessing(true);
-      const filesList = [firstFile, files[0]];
+  const handleCompareSubmit = async () => {
+    setIsProcessing(true);
+    if (firstFile && secondFile) {
+      const formData = new FormData();
+      formData.append("file1", firstFile);
+      formData.append("file2", secondFile);
+      formData.append("temperature", temp.toString()); // Convert temperature to a string
       try {
-        const response = await uploadFile(filesList, "compare", options);
-        setMessages({});
-        await processResponse(response, setMessages, setDocumentID);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/${"compare"}`, {
+          method: "POST",
+          body: formData,
+        });
+        if (response && response.ok) {
+          let streamData = "";
+          const contentType = response.headers.get("Content-Type");
+          if (contentType && contentType.includes("text/event-stream")) {
+            const reader = response.body?.getReader();
+            reader?.read().then(function processStream({ done, value }): Promise<void> {
+              if (done) {
+                console.log("Stream complete");
+                setDoneProcessing(true);
+                setOutput(streamData);
+                return Promise.resolve();
+              }
+              const chunk = new TextDecoder().decode(value);
+              streamData += chunk;
+              return reader.read().then(processStream);
+            });
+          }
+        }
       } catch (error) {
         console.error("Error during file comparison:", error);
       } finally {
         setIsProcessing(false);
       }
+    } else {
+      console.error("One or both files are null");
+      setIsProcessing(false);
     }
   };
 
@@ -349,6 +380,52 @@ const Home: React.FC<HomeProps> = (props) => {
                 </div>
               )}
             </div>
+            {isCompare && (
+              <div>
+                <div style={{ marginBottom: "10px" }}>
+                  <label htmlFor="temperature-slider">Temperature Adjustment for Comparisons: {parseFloat(temp.toFixed(1))}</label>
+                </div>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <span style={{ marginRight: "10px" }}>0</span>
+                  <input
+                    style={{ flex: 1 }}
+                    type="range"
+                    id="temperature-slider"
+                    defaultValue={0}
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    onChange={(e) => {
+                      setTemp(Number(e.target.value));
+                    }}
+                  />
+                  <span style={{ marginLeft: "10px" }}>1</span>
+                </div>
+              </div>
+            )}
+
+            {isCompare && firstFile && (
+              <button
+                type="submit"
+                onClick={handleCompareSubmit}
+                disabled={!secondFileName}
+                className={`mt-3 w-3/4 bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm ${
+                  secondFileName ? "hover:bg-blue-700" : "opacity-80 cursor-not-allowed"
+                }`}
+              >
+                Submit
+              </button>
+            )}
+
+            {doneProcessing && (
+              <div
+                className="file-preview-content mt-4 p-4 bg-white bg-opacity-10 text-white overflow-y-auto max-h-96 w-full"
+                style={{ marginTop: 40, border: "1px solid #D1D5DB", resize: "vertical" }}
+              >
+                <h2>Output: </h2>
+                <h4>{output}</h4>
+              </div>
+            )}
 
             {isSummarize || isParse ? (
               <>
