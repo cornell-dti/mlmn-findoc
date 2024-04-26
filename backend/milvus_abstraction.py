@@ -85,6 +85,9 @@ class MilvusInteraction:
         ]
         return order_by_timestamp(filtered_qa)
 
+    def getDocbyID(self, doc_id):
+        return self.client.query(collection_name="DocumentCollection", ids=doc_id)
+
 
 def get_closest_distance(doc_list: list[list[dict]]):
     if len(doc_list[0]) > 0:
