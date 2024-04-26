@@ -39,11 +39,12 @@ def do_task(doc: str, system_prompt, human_prompt):
         print(e)
         if len(e.args) > 1:
             _, doc_id = e.args
-            insert_qa(
+            q_id = insert_qa(
                 query=human_prompt.format(text=""),
                 answer=final_output.content,
                 documentId=doc_id,
             )
+            return final_output.content, doc_id, q_id
         else:
             doc_id = insert_doc(doc=doc)
             insert_qa(
@@ -51,7 +52,7 @@ def do_task(doc: str, system_prompt, human_prompt):
                 answer=final_output.content,
                 documentId=doc_id,
             )
-    return final_output.content
+        return final_output.content, doc_id
 
 
 def sum_doc(doc: str):
@@ -94,6 +95,7 @@ def main(doc: str, tasks: dict) -> Generator[Any, Any, Any]:
     jobs = []
     for task_name in tasks:
         if tasks[task_name]:
+            task_name = task_name.lower()
             jobs.append(options_to_tasks[task_name])
 
     with ThreadPoolExecutor(max_workers=len(jobs)) as executor:

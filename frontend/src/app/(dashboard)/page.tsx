@@ -241,7 +241,7 @@ const Home: React.FC<HomeProps> = (props) => {
           ""
         )}
         <div className="flex w-full justify-center gap-4 mb-4">
-        {((!firstFileContent && isParse) || isSummarize || isCompare) ? (
+          {(!firstFileContent && isParse) || isSummarize || isCompare ? (
             <div
               className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
                 isProcessing ? ".default-background" : ".default-background"
@@ -265,33 +265,39 @@ const Home: React.FC<HomeProps> = (props) => {
               </label>
               <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
             </div>
-        ) : (
-          ""
-        )}
+          ) : (
+            ""
+          )}
 
-        {isSummarize ? (
+          {isSummarize ? (
             <>
-              <div className="text-white" style={{ marginTop: '65px' }}>or</div> 
-              <FormControl sx={{ 
-              width: '40%', 
-              marginTop: '50px', 
-              '.MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'white', 
-                  borderStyle: 'dashed',
-                },
-                '&:hover fieldset': {
-                  borderColor: 'white', 
-                  borderStyle: 'dashed', 
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'white',
-                  borderStyle: 'dashed', 
-                },
-              },
-              color: 'white', // Optional: If you also want to change the color of the input label and icon
-            }} >
-                <InputLabel id="demo-simple-select-label" style={{ color: 'white' }}>Select from existing file</InputLabel>
+              <div className="text-white" style={{ marginTop: "65px" }}>
+                or
+              </div>
+              <FormControl
+                sx={{
+                  width: "40%",
+                  marginTop: "50px",
+                  ".MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "white",
+                      borderStyle: "dashed",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "white",
+                      borderStyle: "dashed",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "white",
+                      borderStyle: "dashed",
+                    },
+                  },
+                  color: "white", // Optional: If you also want to change the color of the input label and icon
+                }}
+              >
+                <InputLabel id="demo-simple-select-label" style={{ color: "white" }}>
+                  Select from existing file
+                </InputLabel>
                 <Select
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
@@ -299,9 +305,10 @@ const Home: React.FC<HomeProps> = (props) => {
                   label="Select from existing file"
                   onChange={handleDropDownChange}
                   sx={{
-                    color: 'white', // sets the color of the select input text
-                    '& .MuiSvgIcon-root': { // targets the dropdown arrow icon specifically
-                      color: 'white', // sets the color of the dropdown arrow
+                    color: "white", // sets the color of the select input text
+                    "& .MuiSvgIcon-root": {
+                      // targets the dropdown arrow icon specifically
+                      color: "white", // sets the color of the dropdown arrow
                     },
                   }}
                   MenuProps={{
@@ -309,49 +316,51 @@ const Home: React.FC<HomeProps> = (props) => {
                     PaperProps: {
                       style: {
                         height: "125px",
-                        overflowY: "scroll"
-                      }
-                    }}}
+                        overflowY: "scroll",
+                      },
+                    },
+                  }}
                 >
-                  {files.map(file => (
-                    <MenuItem key={file} value={file}>{file}</MenuItem>
+                  {files.map((file) => (
+                    <MenuItem key={file} value={file}>
+                      {file}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </>
           ) : (
             ""
-          )} 
-          </div>
+          )}
+        </div>
 
         <div className="flex w-full flex-col justify-center gap-4 mb-4">
-          {
-            uploadedFileName && isCompare && (
-              <div
-                className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 bg-transparent ${isProcessing ? "bg-gray-200" : "bg-transparent"
-                  } max-w-sm`}
-              >
-                <label htmlFor="second-file-upload" className="flex flex-col align-center justify-center text-center">
-                  <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
-                    <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
-                    {secondFileName ? (
-                      <span className="text-sm text-blue-500">{secondFileName}</span>
-                    ) : (
-                      <label className="text-sm -mb-2">Upload second file</label>
-                    )}
-                  </div>
-                  {!secondFileName && (
-                    <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
-                      Drag and drop <br />
-                      or choose a second file to compare with the first
-                    </span>
+          {uploadedFileName && isCompare && (
+            <div
+              className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 bg-transparent ${
+                isProcessing ? "bg-gray-200" : "bg-transparent"
+              } max-w-sm`}
+            >
+              <label htmlFor="second-file-upload" className="flex flex-col align-center justify-center text-center">
+                <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
+                  <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
+                  {secondFileName ? (
+                    <span className="text-sm text-blue-500">{secondFileName}</span>
+                  ) : (
+                    <label className="text-sm -mb-2">Upload second file</label>
                   )}
-                </label>
-                <input id="second-file-upload" type="file" accept=".txt" className="hidden" onChange={handleSecondFileUpload} />
-              </div>
-            )
-          }
-        </div >
+                </div>
+                {!secondFileName && (
+                  <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
+                    Drag and drop <br />
+                    or choose a second file to compare with the first
+                  </span>
+                )}
+              </label>
+              <input id="second-file-upload" type="file" accept=".txt" className="hidden" onChange={handleSecondFileUpload} />
+            </div>
+          )}
+        </div>
 
         {isSummarize || isParse ? (
           <>
