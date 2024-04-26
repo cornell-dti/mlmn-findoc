@@ -62,6 +62,7 @@ def summarize():
 @server.route("/compare", methods=["GET", "POST"])
 def compare():
     if request.method == "POST":
+        temperature = float(request.form.get('temperature', 0.5))
         if "file1" not in request.files or "file2" not in request.files:
             return Response("No file part in the request", status=400)
         file1 = request.files["file1"]
@@ -78,7 +79,7 @@ def compare():
             content2 = file2.read().decode("utf-8")
 
     def generate():
-        for response in compare_docs(content1, content2):
+        for response in compare_docs(content1, content2, temperature):
             yield response
 
     return Response(generate(), mimetype="text/event-stream")

@@ -5,16 +5,15 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv(), override=True)
 
-temperature = 0.0
 QUERY_INSTRUCTIONS1 = "Enter first query document to compare two documents:"
 QUERY_INSTRUCTIONS2 = "Enter second query document to compare two documents:"
 COMPARE_HUMAN_PROMPT = "Compare these two texts exactly and keep the formatting consistent:\n\n{text1}\n\n{text2}"
 COMPARE_SYSTEM_PROMPT = "You are an AI designed to compare and contrast two different documents. Focus on highlighting the exact differences and similarities between the two documents."
 
 
-def compare_docs(doc1: str, doc2: str):
+def compare_docs(doc1: str, doc2: str, temp: float):
     chat = ChatOpenAI(
-        temperature=temperature,
+        temperature=temp,
         model="gpt-3.5-turbo-0125",
         openai_api_key=os.getenv("YOUR_OPENAI_KEY"),
     )
