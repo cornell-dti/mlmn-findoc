@@ -1,9 +1,10 @@
-from pymilvus import MilvusClient
+from pymilvus import MilvusClient, Collection
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv, find_dotenv
 from sample_files.syllabi import CS_2800_SP22, CS_2110
 import os
 import time
+from supabase_client import *
 
 from milvus_abstraction import (
     DocumentSchema,
