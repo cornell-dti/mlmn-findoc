@@ -90,7 +90,7 @@ const Chat = (props: { messages: Message[]; doc_id: BigInt }) => {
 
   return (
     <div className="flex flex-col w-full h-full p-4">
-      <div className="flex flex-col gap-1 overflow-auto">
+      <div className="flex flex-col gap-1 overflow-auto w-full">
         {/* <div className="flex relative flex-col w-full h-full text-white"> */}
         {/* <p className="text-white text-4xl mb-4"> Summary: </p> */}
         <p className="mb-3"> </p>
