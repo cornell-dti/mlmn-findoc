@@ -1,3 +1,5 @@
 {
-  "prettier.printWidth": 140
+  "prettier.printWidth": 140,
+  "appService.defaultWebAppToDeploy": "/subscriptions/3b38364c-8a47-4b25-889b-6a8ac6a69044/resourceGroups/pratyushsudhakar03_rg_7066/providers/Microsoft.Web/sites/victorious-smoke-c4d9da5f15904410b21dda9d4d00ef1f",
+  "appService.deploySubpath": "backend"
 }

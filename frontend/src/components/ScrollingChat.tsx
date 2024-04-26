@@ -41,7 +41,7 @@ const Chat = (props: { messages: any; doc_id: string }) => {
     setLoading(true);
     const doc = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/doc/${props.doc_id}`);
     const doc_text = await doc.json();
-    const response = await fetch("http://localhost:8080/followup", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/followup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
