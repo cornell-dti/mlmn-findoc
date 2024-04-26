@@ -17,7 +17,7 @@ const Message = (props: { sender: string; content: string; pfp: string; timestam
   );
 };
 
-const Chat = (props: { messages: Message[]; doc_id: number }) => {
+const Chat = (props: { messages: Message[]; doc_id: BigInt }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const { data: session } = useSession();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,13 +37,20 @@ const Chat = (props: { messages: Message[]; doc_id: number }) => {
 
   const fetchResponse = async (message: string): Promise<Message> => {
     setLoading(true);
-    // const doc = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/doc/${props.doc_id}`);
-    const response = await fetch("http://localhost:8080/");
+    const doc = await fetch("http://localhost:8080/doc/" + props.doc_id);
     // headers: {
     //   "Content-Type": "application/json",
     // },
     // body: JSON.stringify({ doc: props.doc_id, query: message }),
     // });
+    const doc_text = await doc.json();
+    const response = await fetch("http://localhost:8080/followup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ doc: doc_text, query: message }),
+    });
     const data = await response.json();
 
     const newMessage = {
