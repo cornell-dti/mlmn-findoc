@@ -1,6 +1,5 @@
 "use client";
-import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 

@@ -1,11 +1,11 @@
 .default-background:hover {
-  background-color: #0D509D;
+  background-color:#695E5E;
 }
 
 .default-background {
-  background-color: #695E5E;
+  background-color:  #0D509D;
 }
 
 .selected-background {
-  background-color: #0D509D;
+  background-color: #695E5E;
 }
