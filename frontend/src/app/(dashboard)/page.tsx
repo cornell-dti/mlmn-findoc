@@ -15,31 +15,6 @@ import supabase from "@/utils/supabase";
 import { TbRuler } from "react-icons/tb";
 
 const summary_options = ["policies", "dates", "summary", "resources", "instructors"];
-const kpi_options = ["course_instructors", "office_hours", "lectures", "description", "learning_objectives", "prerequisites"];
-const kpiHighlightMapping = {
-  course_instructors: "Eshan Chattopadhyay",
-  office_hours: "Monday 10:30am-11:30am, Thursday 1:30pm-2:30pm.",
-  lectures: "MWF 9:05am-9:55am, Uris Hall G01.",
-  description: `This course develops techniques used in the design and analysis of algorithms, with an empha-
-sis on problems arising in computing applications. Example applications are drawn from sys-
-tems and networks, artificial intelligence, computer vision, data mining, and computational bi-
-ology. This course covers four major algorithm design techniques (greedy algorithms, divide and
-conquer, dynamic programming, and network flow), computability theory focusing on undecid-
-ability, computational complexity focusing on NP-completeness, and algorithmic techniques for
-intractable problems, including identification of structured special cases, approximation algo-
-rithms, and local search heuristics. This course continues to build on work in previous courses
-on proofwriting and asymptotic runtime analysis of algorithms.`,
-  learning_objectives: `On completing this course, students should be able to:
-• Identify problems solvable with a greedy algorithm, design and prove the correctness of
-such an algorithm, and supply asymptotic running time for a variety of given algorithms.
-• Recognize problems to which divide and conquer or dynamic programming approaches
-may apply, design algorithms with these approaches, and analyze their computational ef-
-ficiency;`, // Continue the text as necessary
-  prerequisites: `The prerequisites for the course are, either having an A- or better in both CS 2800 and CS 2110,
-or having successfully completed all three of CS 2800, CS 2110, and CS 3110. We assume that
-everyone is familiar with the material in CS 2110, CS 3110, and CS 2800, and we will use it as nec-
-essary in CS 4820`, // Continue the text as necessary
-};
 
 interface HomeProps {
   function: string;
@@ -55,8 +30,6 @@ const Home: React.FC<HomeProps> = (props) => {
   const [savedDocumentName, setSavedDocumentName] = useState("");
   const [submitDisabled, setSubmitDisabled] = useState<boolean>(true);
   const [userEmail, setUserEmail] = useState<string>("");
-  const [highlightedContent, setHighlightedContent] = useState([]);
-  const [highlightPattern, setHighlightPattern] = useState<RegExp | null>(null);
   const isSummarize = props.function === "summarize"
   const isParse = props.function === "parse"
   const isCompare = props.function === "compare"
@@ -69,14 +42,8 @@ const Home: React.FC<HomeProps> = (props) => {
     acc[option] = true;
     return acc;
   }, {});
-  const selected_kpis = kpi_options.reduce((acc: any, kpioption) => {
-    acc[kpioption] = true;
-    return acc;
-  }, {});
 
   const [options, setOptions] = useState<{ [key: string]: boolean }>(options_to_use);
-  const [kpioptions, setkpiOptions] = useState<{ [key: string]: boolean }>(selected_kpis);
-
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [dialogContent, setDialogContent] = useState<{ title: string; text: string }>({ title: "", text: "" });
 
@@ -103,13 +70,6 @@ const Home: React.FC<HomeProps> = (props) => {
     setOptions({
       ...options,
       [option]: !options[option],
-    });
-  };
-
-  const handlekpiOptionChange = (kpioption: string) => {
-    setkpiOptions({
-      ...kpioptions,
-      [kpioption]: !kpioptions[kpioption],
     });
   };
 
@@ -149,23 +109,6 @@ const Home: React.FC<HomeProps> = (props) => {
       setUserEmail(session?.user?.email!);
     });
   }, []);
-
-  useEffect(() => {
-    const pattern = createHighlightPattern(kpiHighlightMapping, kpi_options);
-    setHighlightPattern(pattern);
-  }, [kpioptions]);
-
-  function createHighlightPattern(kpiHighlightMapping: any, kpioptions: string[]) {
-    const regexParts = Object.entries(kpioptions)
-      .filter(([option, isChecked]) => isChecked && kpiHighlightMapping[option])
-      .map(([option]) => {
-        const textToHighlight = kpiHighlightMapping[option].replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
-        return `(${textToHighlight})`;
-      });
-
-    if (regexParts.length === 0) return null;
-    return new RegExp(regexParts.join("|"), "gi");
-  }
 
   const handleFirstFileUpload = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const files = event.target.files;
@@ -472,65 +415,6 @@ const Home: React.FC<HomeProps> = (props) => {
           </h3>
           {/* <Chat messages={[]} doc_id={448985163764905353} /> */}
           <Chat messages={[]} doc_id={448985163764905353} />
-          {/* <div className="file-preview-container">
-            <div
-              className="file-preview-header"
-              style={{
-                backgroundColor: "#33302F",
-                border: "1px solid #D1D5DB",
-                borderTopLeftRadius: 10,
-                borderTopRightRadius: 10,
-                padding: "15px 10px",
-              }}
-            >
-              Uploaded File Preview: {uploadedFileName}
-              {kpi_options.map((option, index) => (
-                <div key={index} className="flex items-center gap-1" style={{ margin: "10px 10px" }}>
-                  <input
-                    type="checkbox"
-                    id={option}
-                    name={option}
-                    checked={options[option]}
-                    onChange={() => handlekpiOptionChange(option)}
-                    className="form-checkbox h-5 w-5 text-blue-600"
-                  />
-                  <label htmlFor={option} className="text-sm">
-                    {option}
-                  </label>
-                </div>
-              ))}
-            </div>
-            <div
-              className="file-preview-content mt-4 p-4 bg-white bg-opacity-10 text-white overflow-y-auto max-h-96 w-full"
-              style={{ marginTop: 0, border: "1px solid #D1D5DB", resize: "vertical" }}
-            >
-              <pre>
-                {
-                  // Replace 'highlightedSubstring' with the actual text you want to highlight
-                  firstFileContent
-                    .split(new RegExp(`(${"Eshan Chattopadhyay"})`, "gi"))
-                    .reduce<React.ReactNode[]>((prev, current, index, array) => {
-                      // Check if the current segment matches the highlighted text
-                      const isMatch = current.toLowerCase() === "Eshan Chattopadhyay".toLowerCase();
-
-                      // If it's a match, push the highlighted span, otherwise push the current string
-                      return isMatch
-                        ? [
-                            ...prev,
-                            <span
-                              key={index}
-                              style={{ backgroundColor: "#B8AEAB", cursor: "pointer" }}
-                              onClick={() => alert("Substring clicked")}
-                            >
-                              {current}
-                            </span>,
-                          ]
-                        : [...prev, current];
-                    }, [])
-                }
-              </pre>
-            </div>
-          </div> */}
         </>
       )}
     </main>
