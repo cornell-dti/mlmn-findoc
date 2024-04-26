@@ -14,6 +14,7 @@ import Chat from "@/components/ScrollingChat";
 import supabase from "@/utils/supabase";
 import './page.css';
 import { TbRuler } from "react-icons/tb";
+import './page.css';
 
 const summary_options = ["Policies", "Dates", "Summary", "Resources", "Instructors"];
 const kpi_options = ["course_instructors", "office_hours", "lectures", "description", "learning_objectives", "prerequisites"];
@@ -98,6 +99,12 @@ const Home: React.FC<HomeProps> = (props) => {
       [option]: !options[option],
     });
   };
+
+
+  const onSubmitParse = (event: React.MouseEvent<HTMLButtonElement>) => {
+    // Handle the submission logic here
+  };
+
 
   useEffect(() => {
     window.addEventListener(
