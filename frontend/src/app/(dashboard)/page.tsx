@@ -32,7 +32,7 @@ const Home: React.FC<HomeProps> = (props) => {
   const [uploadedFiles, setuploadedFiles] = useState<File[]>([]);
   const [temp, setTemp] = useState<Number>(0.0);
   const [savedDocumentName, setSavedDocumentName] = useState("");
-  const [submitDisabled, setSubmitDisabled] = useState<boolean>(true);
+  const [submitDisabled, setSubmitDisabled] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>("");
   const isSummarize = props.function === "summarize";
   const isParse = props.function === "parse";
@@ -46,7 +46,7 @@ const Home: React.FC<HomeProps> = (props) => {
   const [documentID, setDocumentID] = useState<string | null>(null);
 
   const options_to_use = summary_options.reduce((acc: any, option) => {
-    acc[option] = false;
+    acc[option] = true;
     return acc;
   }, {});
 
@@ -104,6 +104,7 @@ const Home: React.FC<HomeProps> = (props) => {
   }, []);
 
   const onExportClick = async () => {
+    console.log(messages);
     const dates = JSON.parse(messages["dates"]);
     const credentials = JSON.parse(localStorage.getItem("gCalCreds")!);
     if (!credentials || !areCredentialsValid(credentials)) {
@@ -521,6 +522,9 @@ const Home: React.FC<HomeProps> = (props) => {
               ? `Processing ${uploadedFileName}`
               : `Comparing ${uploadedFileName} and ${secondFileName}`}
           </h3>
+          <button className="bg-buttonColor text-normal text-white text-sm font-bold py-2 px-7 rounded mt-4" onClick={onExportClick}>
+            Export to Google Calendar
+          </button>
           <Chat messages={messages} doc_id={documentID!} />
         </div>
       )}
