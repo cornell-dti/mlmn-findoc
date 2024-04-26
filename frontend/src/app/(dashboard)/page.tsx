@@ -8,34 +8,13 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-  DialogTitle,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-} from "@mui/material";
+import { DialogTitle, FormControl, IconButton, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { getSession } from "next-auth/react";
 import Chat from "@/components/ScrollingChat";
 import supabase from "@/utils/supabase";
 
-const summary_options = [
-  "policies",
-  "dates",
-  "summary",
-  "resources",
-  "instructors",
-];
-const kpi_options = [
-  "course_instructors",
-  "office_hours",
-  "lectures",
-  "description",
-  "learning_objectives",
-  "prerequisites",
-];
+const summary_options = ["policies", "dates", "summary", "resources", "instructors"];
+const kpi_options = ["course_instructors", "office_hours", "lectures", "description", "learning_objectives", "prerequisites"];
 const kpiHighlightMapping = {
   course_instructors: "Eshan Chattopadhyay",
   office_hours: "Monday 10:30am-11:30am, Thursday 1:30pm-2:30pm.",
@@ -77,10 +56,13 @@ const Home: React.FC<HomeProps> = (props) => {
   const [userEmail, setUserEmail] = useState<string>("");
   const [highlightedContent, setHighlightedContent] = useState([]);
   const [highlightPattern, setHighlightPattern] = useState<RegExp | null>(null);
-  const isSummarize = props.function === "summarize";
-  const isParse = props.function === "parse";
-  const isCompare = props.function === "compare";
-  const [file, setFile] = React.useState("");
+  const isSummarize = props.function === "summarize"
+  const isParse = props.function === "parse"
+  const isCompare = props.function === "compare"
+  const [file, setFile] = React.useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+
 
   const options_to_use = summary_options.reduce((acc: any, option) => {
     acc[option] = true;
@@ -91,18 +73,11 @@ const Home: React.FC<HomeProps> = (props) => {
     return acc;
   }, {});
 
-  const [options, setOptions] = useState<{ [key: string]: boolean }>(
-    options_to_use
-  );
-  const [kpioptions, setkpiOptions] = useState<{ [key: string]: boolean }>(
-    selected_kpis
-  );
+  const [options, setOptions] = useState<{ [key: string]: boolean }>(options_to_use);
+  const [kpioptions, setkpiOptions] = useState<{ [key: string]: boolean }>(selected_kpis);
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [dialogContent, setDialogContent] = useState<{
-    title: string;
-    text: string;
-  }>({ title: "", text: "" });
+  const [dialogContent, setDialogContent] = useState<{ title: string; text: string }>({ title: "", text: "" });
 
   const handleOpenDialog = (title: string, text: string) => {
     setDialogContent({ title, text });
@@ -113,15 +88,14 @@ const Home: React.FC<HomeProps> = (props) => {
     setOpenDialog(false);
   };
 
-  const handleDocumentNameChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleDocumentNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSavedDocumentName(event.target.value);
   };
 
   const handleSubmitButton = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     console.log(savedDocumentName);
+    setIsSubmitted(true);
   };
 
   const handleOptionChange = (option: string) => {
@@ -180,17 +154,11 @@ const Home: React.FC<HomeProps> = (props) => {
     setHighlightPattern(pattern);
   }, [kpioptions]);
 
-  function createHighlightPattern(
-    kpiHighlightMapping: any,
-    kpioptions: string[]
-  ) {
+  function createHighlightPattern(kpiHighlightMapping: any, kpioptions: string[]) {
     const regexParts = Object.entries(kpioptions)
       .filter(([option, isChecked]) => isChecked && kpiHighlightMapping[option])
       .map(([option]) => {
-        const textToHighlight = kpiHighlightMapping[option].replace(
-          /[-\/\\^$*+?.()|[\]{}]/g,
-          "\\$&"
-        );
+        const textToHighlight = kpiHighlightMapping[option].replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
         return `(${textToHighlight})`;
       });
 
@@ -198,9 +166,7 @@ const Home: React.FC<HomeProps> = (props) => {
     return new RegExp(regexParts.join("|"), "gi");
   }
 
-  const handleFirstFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): Promise<void> => {
+  const handleFirstFileUpload = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const files = event.target.files;
     if (files && files[0]) {
       setMessages({});
@@ -225,19 +191,14 @@ const Home: React.FC<HomeProps> = (props) => {
         const response = await uploadFile(files[0], "summarize", options);
         await processResponse(response, setMessages);
       } catch (error) {
-        console.error(
-          "Error during file upload or response processing:",
-          error
-        );
+        console.error("Error during file upload or response processing:", error);
       } finally {
         setIsProcessing(false);
       }
     }
   };
 
-  const handleSecondFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): Promise<void> => {
+  const handleSecondFileUpload = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const files = event.target.files;
     if (files && files[0] && firstFile) {
       setSecondFileName(files[0].name);
@@ -290,10 +251,7 @@ const Home: React.FC<HomeProps> = (props) => {
         </h1>
 
         {isParse ? (
-          <div
-            className="flex items-center gap-2 text-white"
-            style={{ marginBottom: "20px" }}
-          >
+          <div className="flex items-center gap-2 text-white" style={{ marginBottom: "20px" }}>
             {summary_options.map((option, index) => (
               <div key={index} className="flex items-center gap-1">
                 <input
@@ -320,22 +278,11 @@ const Home: React.FC<HomeProps> = (props) => {
               isProcessing ? "bg-gray-200" : "bg-transparent"
             } max-w-sm`}
           >
-            <label
-              htmlFor="first-file-upload"
-              className="flex flex-col align-center justify-center text-center"
-            >
+            <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
               <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
-                <Image
-                  src="/icons/upload-file.png"
-                  alt="Upload"
-                  className="mx-auto"
-                  width={50}
-                  height={50}
-                />
+                <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
                 {uploadedFileName ? (
-                  <span className="text-sm text-blue-500">
-                    {uploadedFileName}
-                  </span>
+                  <span className="text-sm text-blue-500">{uploadedFileName}</span>
                 ) : (
                   <label className="text-sm -mb-2">Upload first file</label>
                 )}
@@ -347,47 +294,32 @@ const Home: React.FC<HomeProps> = (props) => {
                 </span>
               )}
             </label>
-            <input
-              id="first-file-upload"
-              type="file"
-              accept=".txt"
-              className="hidden"
-              onChange={handleFirstFileUpload}
-            />
+            <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
           </div>
 
           {isSummarize ? (
             <>
-              <div className="text-white" style={{ marginTop: "65px" }}>
-                or
-              </div>
-              <FormControl
-                sx={{
-                  width: "40%",
-                  marginTop: "50px",
-                  ".MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: "white",
-                      borderStyle: "dashed",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "white",
-                      borderStyle: "dashed",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "white",
-                      borderStyle: "dashed",
-                    },
-                  },
-                  color: "white", // Optional: If you also want to change the color of the input label and icon
-                }}
-              >
-                <InputLabel
-                  id="demo-simple-select-label"
-                  style={{ color: "white" }}
-                >
-                  Select from existing file
-                </InputLabel>
+              <div className="text-white" style={{ marginTop: '65px' }}>or</div> 
+              <FormControl sx={{ 
+              width: '40%', 
+              marginTop: '50px', 
+              '.MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'white', 
+                  borderStyle: 'dashed',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'white', 
+                  borderStyle: 'dashed', 
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'white',
+                  borderStyle: 'dashed', 
+                },
+              },
+              color: 'white', // Optional: If you also want to change the color of the input label and icon
+            }} >
+                <InputLabel id="demo-simple-select-label" style={{ color: 'white' }}>Select from existing file</InputLabel>
                 <Select
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
@@ -395,10 +327,9 @@ const Home: React.FC<HomeProps> = (props) => {
                   label="Select from existing file"
                   onChange={handleDropDownChange}
                   sx={{
-                    color: "white", // sets the color of the select input text
-                    "& .MuiSvgIcon-root": {
-                      // targets the dropdown arrow icon specifically
-                      color: "white", // sets the color of the dropdown arrow
+                    color: 'white', // sets the color of the select input text
+                    '& .MuiSvgIcon-root': { // targets the dropdown arrow icon specifically
+                      color: 'white', // sets the color of the dropdown arrow
                     },
                   }}
                 >
@@ -410,7 +341,7 @@ const Home: React.FC<HomeProps> = (props) => {
             </>
           ) : (
             ""
-          )}
+          )} 
 
           {uploadedFileName && isCompare && (
             <div
@@ -418,22 +349,11 @@ const Home: React.FC<HomeProps> = (props) => {
                 isProcessing ? "bg-gray-200" : "bg-transparent"
               } max-w-sm`}
             >
-              <label
-                htmlFor="second-file-upload"
-                className="flex flex-col align-center justify-center text-center"
-              >
+              <label htmlFor="second-file-upload" className="flex flex-col align-center justify-center text-center">
                 <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
-                  <Image
-                    src="/icons/upload-file.png"
-                    alt="Upload"
-                    className="mx-auto"
-                    width={50}
-                    height={50}
-                  />
+                  <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
                   {secondFileName ? (
-                    <span className="text-sm text-blue-500">
-                      {secondFileName}
-                    </span>
+                    <span className="text-sm text-blue-500">{secondFileName}</span>
                   ) : (
                     <label className="text-sm -mb-2">Upload second file</label>
                   )}
@@ -445,24 +365,15 @@ const Home: React.FC<HomeProps> = (props) => {
                   </span>
                 )}
               </label>
-              <input
-                id="second-file-upload"
-                type="file"
-                accept=".txt"
-                className="hidden"
-                onChange={handleSecondFileUpload}
-              />
+              <input id="second-file-upload" type="file" accept=".txt" className="hidden" onChange={handleSecondFileUpload} />
             </div>
           )}
         </div>
 
-        {isSummarize || isParse ? (
+          {isSummarize || isParse ? (
           <>
             <div className="flex flex-col items-center mt-4">
-              <label
-                htmlFor="document-name"
-                className="text-white font-bold mb-2"
-              >
+              <label htmlFor="document-name" className="text-white font-bold mb-2">
                 What do you want to call this document?
               </label>
               <input
@@ -478,11 +389,8 @@ const Home: React.FC<HomeProps> = (props) => {
                 onClick={handleSubmitButton}
                 disabled={submitDisabled}
                 className={`mt-3 w-3/4 bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm ${
-                  !submitDisabled
-                    ? "hover:bg-blue-700"
-                    : "opacity-80 cursor-not-allowed"
-                }`}
-              >
+                  !submitDisabled ? 'hover:bg-blue-700' : 'opacity-80 cursor-not-allowed'
+                }`}              >
                 Submit
               </button>
             </div>
@@ -493,10 +401,7 @@ const Home: React.FC<HomeProps> = (props) => {
         {isProcessing && <h2 className="text-white text-lg">Processing...</h2>}
         {options.dates && !isProcessing && firstFile !== null && (
           <div className="flex flex-col items-center justify-center">
-            <button
-              className="bg-blue-500 text-white font-bold py-2 px-4 rounded mt-4"
-              onClick={onExportClick}
-            >
+            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded mt-4" onClick={onExportClick}>
               Export to Google Calendar
             </button>
           </div>
@@ -536,18 +441,9 @@ const Home: React.FC<HomeProps> = (props) => {
           }))}
         /> */}
 
-        <Dialog
-          open={openDialog}
-          onClose={handleCloseDialog}
-          maxWidth="md"
-          fullWidth
-        >
+        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
           <DialogContent>
-            <IconButton
-              aria-label="close"
-              onClick={handleCloseDialog}
-              style={{ position: "absolute", right: 8, top: 8 }}
-            >
+            <IconButton aria-label="close" onClick={handleCloseDialog} style={{ position: "absolute", right: 8, top: 8 }}>
               <CloseIcon />
             </IconButton>
             <div className="bg-white bg-opacity-10 p-4">
@@ -557,21 +453,15 @@ const Home: React.FC<HomeProps> = (props) => {
         </Dialog>
       </div>
 
-      {/* <ScrollingChat message={Object.values(messages)} /> */}
-      <Chat messages={[]} doc_id={448985163764905353} />
-      <h3 className="text-4xl text-white mb-6" style={{ marginTop: "30px" }}>
-        Uploaded File Preview
-      </h3>
-
-      {firstFileContent && (
+      
+      {isSubmitted && firstFileContent && (
         <>
-          <h3
-            className="text-4xl text-white mb-6"
-            style={{ marginTop: "30px" }}
-          >
-            Uploaded File Preview
+          <h3 className="text-4xl text-white mb-6" style={{ marginTop: "30px" }}>
+            Chat
           </h3>
-          <div className="file-preview-container">
+          {/* <Chat messages={[]} doc_id={448985163764905353} /> */}
+          <Chat messages={messages} doc_id={448985163764905353} />
+          {/* <div className="file-preview-container">
             <div
               className="file-preview-header"
               style={{
@@ -584,11 +474,7 @@ const Home: React.FC<HomeProps> = (props) => {
             >
               Uploaded File Preview: {uploadedFileName}
               {kpi_options.map((option, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-1"
-                  style={{ margin: "10px 10px" }}
-                >
+                <div key={index} className="flex items-center gap-1" style={{ margin: "10px 10px" }}>
                   <input
                     type="checkbox"
                     id={option}
@@ -605,47 +491,35 @@ const Home: React.FC<HomeProps> = (props) => {
             </div>
             <div
               className="file-preview-content mt-4 p-4 bg-white bg-opacity-10 text-white overflow-y-auto max-h-96 w-full"
-              style={{
-                marginTop: 0,
-                border: "1px solid #D1D5DB",
-                resize: "vertical",
-              }}
+              style={{ marginTop: 0, border: "1px solid #D1D5DB", resize: "vertical" }}
             >
               <pre>
                 {
                   // Replace 'highlightedSubstring' with the actual text you want to highlight
                   firstFileContent
                     .split(new RegExp(`(${"Eshan Chattopadhyay"})`, "gi"))
-                    .reduce<React.ReactNode[]>(
-                      (prev, current, index, array) => {
-                        // Check if the current segment matches the highlighted text
-                        const isMatch =
-                          current.toLowerCase() ===
-                          "Eshan Chattopadhyay".toLowerCase();
+                    .reduce<React.ReactNode[]>((prev, current, index, array) => {
+                      // Check if the current segment matches the highlighted text
+                      const isMatch = current.toLowerCase() === "Eshan Chattopadhyay".toLowerCase();
 
-                        // If it's a match, push the highlighted span, otherwise push the current string
-                        return isMatch
-                          ? [
-                              ...prev,
-                              <span
-                                key={index}
-                                style={{
-                                  backgroundColor: "#B8AEAB",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() => alert("Substring clicked")}
-                              >
-                                {current}
-                              </span>,
-                            ]
-                          : [...prev, current];
-                      },
-                      []
-                    )
+                      // If it's a match, push the highlighted span, otherwise push the current string
+                      return isMatch
+                        ? [
+                            ...prev,
+                            <span
+                              key={index}
+                              style={{ backgroundColor: "#B8AEAB", cursor: "pointer" }}
+                              onClick={() => alert("Substring clicked")}
+                            >
+                              {current}
+                            </span>,
+                          ]
+                        : [...prev, current];
+                    }, [])
                 }
               </pre>
             </div>
-          </div>
+          </div> */}
         </>
       )}
     </main>
