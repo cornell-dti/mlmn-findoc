@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { getSession } from "next-auth/react";
 import Chat from "@/components/ScrollingChat";
+import supabase from "@/utils/supabase";
 
 const summary_options = [
   "policies",
@@ -258,6 +259,27 @@ const Home: React.FC<HomeProps> = (props) => {
     setFile(event.target.value as string);
   };
 
+  async function getFileHistory(): Promise<string[]> {
+    const response = await supabase
+        .from("user-doc")
+        .select("*")
+        .eq("userID", 9);
+
+    // Map the response data to extract the "docID" values
+    return response.data?.map(val => val["docID"]) as string[];
+  }
+
+  const [files, setFiles] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchFileHistory = async () => {
+      const fileHistory = await getFileHistory();
+      setFiles(fileHistory);
+    };
+
+    fetchFileHistory();
+  }, []);
+
   return (
     <main className="flex flex-col items-center justify-between p-8">
       <div className="flex flex-col items-center justify-center h-full pt-2">
@@ -380,9 +402,9 @@ const Home: React.FC<HomeProps> = (props) => {
                     },
                   }}
                 >
-                  <MenuItem value={10}>File 1</MenuItem>
-                  <MenuItem value={20}>File 2</MenuItem>
-                  <MenuItem value={30}>File 3</MenuItem>
+                  {files.map(file => (
+                    <MenuItem key={file} value={file}>{file}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </>
