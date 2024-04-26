@@ -78,7 +78,7 @@ const Chat = (props: { messages: Message[]; doc_id: BigInt }) => {
           style={{ borderTopLeftRadius: "0.375rem", borderBottomLeftRadius: "0.375rem", borderRight: "none" }}
         />
         <button
-          className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-r-lg"
+          className="bg-buttonColor hover:bg-hoverColor text-white py-2 px-4 rounded-r-lg"
           onClick={handleSend}
           style={{ borderTopRightRadius: "0.375rem", borderBottomRightRadius: "0.375rem" }}
         >

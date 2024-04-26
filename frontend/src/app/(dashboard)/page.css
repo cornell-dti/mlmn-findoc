@@ -1,11 +1,32 @@
 .default-background:hover {
-  background-color: #0D509D;
+  background-color:#695E5E;
 }
 
 .default-background {
-  background-color: #695E5E;
+  background-color:  #0D509D;
 }
 
 .selected-background {
-  background-color: #0D509D;
+  background-color: #695E5E;
+}
+
+
+.page-transition {
+  transition: transform 0.5s ease-in-out;
+}
+
+.page-transition-enter {
+  transform: translateY(100%);
+}
+
+.page-transition-enter-active {
+  transform: translateY(0);
+}
+
+.page-transition-exit {
+  transform: translateY(0);
+}
+
+.page-transition-exit-active {
+  transform: translateY(-100%);
 }

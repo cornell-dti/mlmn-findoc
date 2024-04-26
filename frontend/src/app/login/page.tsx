@@ -16,7 +16,7 @@ const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => signIn("google", { callbackUrl: process.env.NEXT_PUBLIC_API_URL + "/welcome"})}
-              className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-medium rounded-md text-white bg-buttonColor hover:bg-hoverColor focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <svg
                 className="mr-2 -ml-1 w-12 h-12"

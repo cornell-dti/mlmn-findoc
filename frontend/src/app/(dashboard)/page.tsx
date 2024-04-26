@@ -240,9 +240,8 @@ const Home: React.FC<HomeProps> = (props) => {
         ) : (
           ""
         )}
-
-        {(!firstFileContent && isParse) || isSummarize || isCompare ? (
-          <div className="flex w-full justify-center gap-4 mb-4">
+        <div className="flex w-full justify-center gap-4 mb-4">
+        {((!firstFileContent && isParse) || isSummarize || isCompare) ? (
             <div
               className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
                 isProcessing ? ".default-background" : ".default-background"
@@ -266,96 +265,93 @@ const Home: React.FC<HomeProps> = (props) => {
               </label>
               <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
             </div>
-          </div>
         ) : (
           ""
         )}
 
-        <div className="flex w-full flex-col justify-center gap-4 mb-4">
-          {/* <div className="flex w-full justify-center gap-4 mb-4">
-            <div
-              className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${isProcessing ? "bg-gray-200" : "bg-transparent"
-                } max-w-sm`}
-            >
-              <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
-                <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
-                  <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
-                  {(uploadedFileName) ? (
-                    <span className="text-sm text-blue-500">{uploadedFileName}</span>
-                  ) : (
-                    <label className="text-sm -mb-2">Upload first file</label>
-                  )}
-                </div>
-                {!uploadedFileName && (
-                  <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
-                    Drag and drop <br />
-                    or choose a file to upload
-                  </span>
-                )}
-              </label>
-              <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
-            </div>
-          </div> */}
-
-          {isSummarize ? (
+        {isSummarize ? (
             <>
-              <div className="text-white" style={{ marginTop: "65px" }}>
-                or
-              </div>
-              <div
-                className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
-                  isProcessing ? "bg-gray-200" : "bg-transparent"
-                } max-w-sm`}
-              >
-                <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
-                  <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
-                    <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
-                    {uploadedFileName ? (
-                      <span className="text-sm text-blue-500">{uploadedFileName}</span>
-                    ) : (
-                      <label className="text-sm -mb-2">Upload first file</label>
-                    )}
-                  </div>
-                  {!uploadedFileName && (
-                    <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
-                      Drag and drop <br />
-                      or choose a file to upload
-                    </span>
-                  )}
-                </label>
-                <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
-              </div>
+              <div className="text-white" style={{ marginTop: '65px' }}>or</div> 
+              <FormControl sx={{ 
+              width: '40%', 
+              marginTop: '50px', 
+              '.MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'white', 
+                  borderStyle: 'dashed',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'white', 
+                  borderStyle: 'dashed', 
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'white',
+                  borderStyle: 'dashed', 
+                },
+              },
+              color: 'white', // Optional: If you also want to change the color of the input label and icon
+            }} >
+                <InputLabel id="demo-simple-select-label" style={{ color: 'white' }}>Select from existing file</InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={file}
+                  label="Select from existing file"
+                  onChange={handleDropDownChange}
+                  sx={{
+                    color: 'white', // sets the color of the select input text
+                    '& .MuiSvgIcon-root': { // targets the dropdown arrow icon specifically
+                      color: 'white', // sets the color of the dropdown arrow
+                    },
+                  }}
+                  MenuProps={{
+                    autoFocus: false,
+                    PaperProps: {
+                      style: {
+                        height: "125px",
+                        overflowY: "scroll"
+                      }
+                    }}}
+                >
+                  {files.map(file => (
+                    <MenuItem key={file} value={file}>{file}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </>
           ) : (
             ""
-          )}
+          )} 
+          </div>
 
-          {uploadedFileName && isCompare && (
-            <div
-              className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 bg-transparent ${
-                isProcessing ? "bg-gray-200" : "bg-transparent"
-              } max-w-sm`}
-            >
-              <label htmlFor="second-file-upload" className="flex flex-col align-center justify-center text-center">
-                <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
-                  <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
-                  {secondFileName ? (
-                    <span className="text-sm text-blue-500">{secondFileName}</span>
-                  ) : (
-                    <label className="text-sm -mb-2">Upload second file</label>
+        <div className="flex w-full flex-col justify-center gap-4 mb-4">
+          {
+            uploadedFileName && isCompare && (
+              <div
+                className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 bg-transparent ${isProcessing ? "bg-gray-200" : "bg-transparent"
+                  } max-w-sm`}
+              >
+                <label htmlFor="second-file-upload" className="flex flex-col align-center justify-center text-center">
+                  <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
+                    <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
+                    {secondFileName ? (
+                      <span className="text-sm text-blue-500">{secondFileName}</span>
+                    ) : (
+                      <label className="text-sm -mb-2">Upload second file</label>
+                    )}
+                  </div>
+                  {!secondFileName && (
+                    <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
+                      Drag and drop <br />
+                      or choose a second file to compare with the first
+                    </span>
                   )}
-                </div>
-                {!secondFileName && (
-                  <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
-                    Drag and drop <br />
-                    or choose a second file to compare with the first
-                  </span>
-                )}
-              </label>
-              <input id="second-file-upload" type="file" accept=".txt" className="hidden" onChange={handleSecondFileUpload} />
-            </div>
-          )}
-        </div>
+                </label>
+                <input id="second-file-upload" type="file" accept=".txt" className="hidden" onChange={handleSecondFileUpload} />
+              </div>
+            )
+          }
+        </div >
 
         {isSummarize || isParse ? (
           <>
@@ -375,8 +371,8 @@ const Home: React.FC<HomeProps> = (props) => {
                 type="submit"
                 onClick={handleSubmitButton}
                 disabled={submitDisabled}
-                className={`mt-3 w-3/4 bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm ${
-                  !submitDisabled ? "hover:bg-blue-700" : "opacity-80 cursor-not-allowed"
+                className={`mt-3 w-3/4 bg-buttonColor text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm ${
+                  !submitDisabled ? "hover:bg-hoverColor" : "opacity-80 cursor-not-allowed"
                 }`}
               >
                 Submit
@@ -401,18 +397,16 @@ const Home: React.FC<HomeProps> = (props) => {
             </button>
           </div>
         )} */}
-        {!isProcessing && firstFile !== null && (
-          <div className="flex flex-col items-center justify-center">
-            <button
-              className={`${
-                Object.values(options).some((value) => value) ? "selected-background" : "default-background"
-              } text-white font-bold py-2 px-4 rounded mt-4`}
-              onClick={onSubmitParse}
-            >
-              Submit
-            </button>
-          </div>
-        )}
+        {/* {
+          !isProcessing && firstFile !== null && (
+            <div className="flex flex-col items-center justify-center">
+              <button className={`${Object.values(options).some(value => value) ? "selected-background" : "default-background"} text-white font-bold py-2 px-4 rounded mt-4`} onClick={onSubmitParse}>
+                Submit
+              </button>
+
+            </div>
+          )
+        } */}
         {/* <div className="overflow-x-scroll overflow-y-hidden max-w-screen-lg mt-10 max-h-80">
           <div className="flex flex-no-wrap max-h-96">
             {Object.entries(messages).map(([key, message], index) =>
