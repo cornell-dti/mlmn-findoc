@@ -134,6 +134,7 @@ const Home: React.FC<HomeProps> = (props) => {
       setUploadedFileName(files[0].name);
       setFirstFile(files[0]);
       setuploadedFiles([files[0]]);
+      setSubmitDisabled(false);
     }
   };
 
@@ -382,8 +383,8 @@ const Home: React.FC<HomeProps> = (props) => {
               )}
             </div>
             {isCompare && (
-              <div>
-                <div style={{ marginBottom: "10px" }}>
+              <div style={{color: "white"}}>
+                <div style={{ marginBottom: "10px"}}>
                   <label htmlFor="temperature-slider">Temperature Adjustment for Comparisons: {parseFloat(temp.toFixed(1))}</label>
                 </div>
                 <div style={{ display: "flex", alignItems: "center" }}>
