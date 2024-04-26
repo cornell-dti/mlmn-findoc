@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 "use client";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
@@ -13,78 +12,6 @@ const Message = (props: { sender: string; content: string; pfp: string; timestam
         <p className="font-bold">{props.sender}</p>
         <p>{props.content}</p>
       </div>
-=======
-import React, { useEffect, useState } from "react";
-import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
-import { MainContainer, ChatContainer, MessageList, Message, MessageInput } from "@chatscope/chat-ui-kit-react";
-
-function ChatComponent({ fileContent, message }: { fileContent: string; message: any[] }) {
-  const [messages, setMessages] = useState<any[]>([]);
-  const [file, setFile] = useState<string>("");
-
-  useEffect(() => {
-    setMessages(message);
-    setFile(fileContent);
-  }, [message, fileContent]);
-
-  const sendMessage = async (text: string) => {
-    if (text.trim()) {
-      const sentMessage = {
-        message: text,
-        sentTime: new Date().toISOString(),
-        sender: "You",
-        direction: "outgoing",
-        position: "single",
-      };
-
-      setMessages((messages) => [...messages!, sentMessage]);
-
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/followup`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ doc: file, query: text }),
-        });
-        const message = await response.json();
-        const serverMessage = {
-          message: message,
-          sentTime: new Date().toISOString(),
-          sender: "Support",
-          direction: "incoming",
-          position: "single",
-        };
-
-        setMessages((messages) => [...messages, serverMessage]);
-      } catch (error) {
-        console.error("Error sending message:", error);
-      }
-    }
-  };
-
-  return (
-    <div style={{ position: "relative", height: "500px" }}>
-      <MainContainer>
-        <ChatContainer>
-          <MessageList>
-            {messages.map((msg, index) => (
-              <Message
-                key={index}
-                model={{
-                  message: msg.message,
-                  sentTime: msg.sentTime,
-                  sender: msg.sender,
-                  direction: msg.direction,
-                  position: msg.position,
-                }}
-              />
-            ))}
-          </MessageList>
-          <MessageInput placeholder="Type your message here..." onSend={sendMessage} />
-        </ChatContainer>
-      </MainContainer>
->>>>>>> 46adc7a6026c41d5294e783d6c38a786a18ec3b9
     </div>
   );
 };
@@ -96,50 +23,47 @@ interface Message {
   timestamp: Date;
 }
 
-<<<<<<< HEAD
-const ScrollingChat = (props: { messages: Message[] }) => {
-  const { data: session } = useSession();
-
-  return (
-    <div className="flex border-2 border-red-500 relative flex-col w-full h-full text-white">
-      <p className="text-white text-4xl"> Summary: </p>
-      <p className="mb-3"> </p>
-      <Message sender={session?.user?.name!} content="hello" pfp={session?.user?.image!} timestamp={Date.now()} />
-      <p className="mb-5"> </p>
-      <Message
-        sender="chat"
-        content="hello I am a language model build by DTI"
-        pfp={"https://avatars.githubusercontent.com/u/19356609?s=280&v=4"}
-        timestamp={Date.now()}
-      />
-      {/* {props.messages.map((msg) => (
-        <Message key={msg.content} sender={msg.sender} content={msg.content} pfp={msg.pfp} timestamp={msg.timestamp} />
-      ))} */}
-    </div>
-  );
-};
-
-const Chat = (props: { messages: Message[] }) => {
+const Chat = (props: { messages: Message[]; doc_id: number }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const { data: session } = useSession();
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSend = () => {
-    setMessages([
-      ...messages,
-      {
-        sender: session?.user?.name!,
-        content: inputRef.current?.value!,
-        pfp: session?.user?.image!,
-        timestamp: new Date(),
-      },
-    ]);
+  const handleSend = async () => {
+    const userMessage = {
+      sender: session?.user?.name!,
+      content: inputRef.current?.value!,
+      pfp: session?.user?.image!,
+      timestamp: new Date(),
+    };
+    const gptResponse = await fetchResponse(inputRef.current?.value!);
+    setMessages([...messages, userMessage, gptResponse]);
   };
 
-  const fetchResponse = async (message: string) => {
+  const fetchResponse = async (message: string): Promise<Message> => {
     setLoading(true);
+    // const doc = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/doc/${props.doc_id}`);
+    const response = await fetch("http://localhost:8080/");
+    // headers: {
+    //   "Content-Type": "application/json",
+    // },
+    // body: JSON.stringify({ doc: props.doc_id, query: message }),
+    // });
+    const data = await response.json();
+
+    const newMessage = {
+      sender: "chat",
+      content: data,
+      pfp: "https://avatars.githubusercontent.com/u/19356609?s=280&v=4",
+      timestamp: new Date(),
+    };
+    setLoading(false);
+    return newMessage;
   };
+
+  useEffect(() => {
+    console.log("messages", messages);
+  }, [messages]);
 
   const InputField = () => {
     return (
@@ -154,7 +78,7 @@ const Chat = (props: { messages: Message[] }) => {
 
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="flex border-2 border-red-500 relative flex-col w-full h-full text-white">
+      <div className="flex relative flex-col w-full h-full text-white">
         <p className="text-white text-4xl"> Summary: </p>
         <p className="mb-3"> </p>
         <Message sender={session?.user?.name!} content="hello" pfp={session?.user?.image!} timestamp={Date.now()} />
@@ -165,8 +89,8 @@ const Chat = (props: { messages: Message[] }) => {
           pfp={"https://avatars.githubusercontent.com/u/19356609?s=280&v=4"}
           timestamp={Date.now()}
         />
-        {messages.map((msg) => (
-          <Message key={msg.content} sender={msg.sender} content={msg.content} pfp={msg.pfp} timestamp={msg.timestamp.getTime()} />
+        {messages.map((msg, i) => (
+          <Message key={i} sender={msg.sender} content={msg.content} pfp={msg.pfp} timestamp={msg.timestamp.getTime()} />
         ))}
       </div>
       <InputField />
@@ -175,6 +99,3 @@ const Chat = (props: { messages: Message[] }) => {
 };
 
 export default Chat;
-=======
-export default ChatComponent;
->>>>>>> 46adc7a6026c41d5294e783d6c38a786a18ec3b9

@@ -370,7 +370,7 @@ const Home: React.FC<HomeProps> = (props) => {
       </div>
 
       {/* <ScrollingChat message={Object.values(messages)} /> */}
-      <Chat messages={[]} />
+      <Chat messages={[]} doc_id={448985163764905353} />
       <h3 className="text-4xl text-white mb-6" style={{ marginTop: "30px" }}>
         Uploaded File Preview
       </h3>
