@@ -12,6 +12,7 @@ import { DialogTitle, FormControl, IconButton, InputLabel, MenuItem, Select, Sel
 import { getSession } from "next-auth/react";
 import Chat from "@/components/ScrollingChat";
 import supabase from "@/utils/supabase";
+import { TbRuler } from "react-icons/tb";
 
 const summary_options = ["policies", "dates", "summary", "resources", "instructors"];
 const kpi_options = ["course_instructors", "office_hours", "lectures", "description", "learning_objectives", "prerequisites"];
@@ -218,6 +219,7 @@ const Home: React.FC<HomeProps> = (props) => {
 
   const handleDropDownChange = (event: SelectChangeEvent) => {
     setFile(event.target.value as string);
+    setSubmitDisabled(false);
   };
 
   async function getFileHistory(): Promise<string[]> {
@@ -387,7 +389,7 @@ const Home: React.FC<HomeProps> = (props) => {
               <input
                 id="document-name"
                 type="text"
-                placeholder="Enter Here"
+                placeholder="Enter here"
                 value={savedDocumentName}
                 onChange={handleDocumentNameChange}
                 className="text-black w-3/4 px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 text-sm"
@@ -462,13 +464,14 @@ const Home: React.FC<HomeProps> = (props) => {
       </div>
 
       
-      {isSubmitted && firstFileContent && (
+      {isSubmitted && (
+      // {isSubmitted && firstFileContent && (
         <>
           <h3 className="text-4xl text-white mb-6" style={{ marginTop: "30px" }}>
             Chat
           </h3>
           {/* <Chat messages={[]} doc_id={448985163764905353} /> */}
-          <Chat messages={messages} doc_id={448985163764905353} />
+          <Chat messages={[]} doc_id={448985163764905353} />
           {/* <div className="file-preview-container">
             <div
               className="file-preview-header"
