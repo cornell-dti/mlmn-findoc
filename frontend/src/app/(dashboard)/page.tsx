@@ -377,7 +377,7 @@ const Home: React.FC<HomeProps> = (props) => {
         {isProcessing && <h2 className="text-white text-lg">Processing...</h2>}
         {isParse && options.dates && !isProcessing && firstFile !== null && (
           <div className="flex flex-col items-center justify-center">
-            <button className="bg-button-color text-white font-bold py-2 px-4 rounded mt-4" onClick={onExportClick}>
+            <button className="bg-buttonColor text-normal text-white text-sm font-bold py-2 px-7 rounded mt-4" onClick={onExportClick}>
               Export to Google Calendar
             </button>
           </div>
