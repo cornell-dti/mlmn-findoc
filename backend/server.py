@@ -17,6 +17,7 @@ from compare_docs import compare_docs
 from flask_cors import CORS
 from gcal_integration import CalendarClient, CredentialsPayload
 from typing import Optional
+from vector_db import get_doc_text_by_id, get_query_text_by_id, get_query_answer_by_id
 
 load_dotenv(find_dotenv(), override=True)
 
@@ -91,6 +92,18 @@ def followup():
     query = data.get("query")
     resp = follow_up(content, query)
     return jsonify(resp)
+
+@server.route("/doc/<doc_id>", methods=["GET"])
+def get_doc_text(doc_id):
+    return jsonify(get_doc_text_by_id(int(doc_id)))
+
+@server.route("/query/<query_id>", methods=["GET"])
+def get_query_text(query_id):
+    return jsonify(get_query_text_by_id(int(query_id)))
+
+@server.route("/answer/<query_id>", methods=["GET"])
+def get_query_answer(query_id):
+    return jsonify(get_query_answer_by_id(int(query_id)))
 
 
 client = CalendarClient(API_CLIENT_ID, API_CLIENT_SECRET, SCOPES)

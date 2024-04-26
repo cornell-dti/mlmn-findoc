@@ -24,10 +24,6 @@ const Chat = (props: { messages: Message[]; doc_id: number }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSend = async () => {
-    // getUserIdByEmail(session?.user?.email!).then((data) => console.log(data));
-    // getDocsByUserId(9).then((data) => console.log(data));
-    // getQueries(9, 448985163764903046n).then((data) => console.log(data));
-    uploadDoc(9, 448985163764903046n, "test2").then((data) => console.log(data));
     const userMessage = {
       sender: session?.user?.name!,
       content: inputRef.current?.value!,
