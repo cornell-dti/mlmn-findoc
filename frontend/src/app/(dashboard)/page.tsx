@@ -591,7 +591,7 @@ const Home: React.FC<HomeProps> = (props) => {
               ? `Processing ${uploadedFileName}`
               : `Comparing ${uploadedFileName} and ${secondFileName}`}
           </h3>
-          <Chat messages={[]} doc_id={448985163764905353} />
+          {/* <Chat messages={[]} doc_id={448985163764905353} /> */}
         </div>
       )}
     </main>
