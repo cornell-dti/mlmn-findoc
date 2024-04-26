@@ -1,8 +1,9 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { type Message } from "@/types";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import supabase from "@/utils/supabase";
+import { getDocsByUserId, getQueries, getUserIdByEmail, uploadDoc } from "@/utils/chatUtils";
 
 const Message = (props: { sender: string; content: string; pfp: string; timestamp: number }) => {
   return (
@@ -16,13 +17,6 @@ const Message = (props: { sender: string; content: string; pfp: string; timestam
   );
 };
 
-interface Message {
-  sender: string;
-  content: string;
-  pfp: string;
-  timestamp: Date;
-}
-
 const Chat = (props: { messages: Message[]; doc_id: number }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const { data: session } = useSession();
@@ -30,6 +24,10 @@ const Chat = (props: { messages: Message[]; doc_id: number }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSend = async () => {
+    // getUserIdByEmail(session?.user?.email!).then((data) => console.log(data));
+    // getDocsByUserId(9).then((data) => console.log(data));
+    // getQueries(9, 448985163764903046n).then((data) => console.log(data));
+    uploadDoc(9, 448985163764903046n, "test2").then((data) => console.log(data));
     const userMessage = {
       sender: session?.user?.name!,
       content: inputRef.current?.value!,
