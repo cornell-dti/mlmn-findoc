@@ -10,4 +10,4 @@ COPY . .
 EXPOSE 8080
 
 ENV ENV=production
-CMD ["python", "server.py"]
+ENTRYPOINT ["gunicorn", "server:server"]
