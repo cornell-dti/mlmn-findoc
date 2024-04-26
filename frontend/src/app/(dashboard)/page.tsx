@@ -332,6 +332,14 @@ const Home: React.FC<HomeProps> = (props) => {
                       color: 'white', // sets the color of the dropdown arrow
                     },
                   }}
+                  MenuProps={{
+                    autoFocus: false,
+                    PaperProps: {
+                      style: {
+                        height: "125px",
+                        overflowY: "scroll"
+                      }
+                    }}}
                 >
                   {files.map(file => (
                     <MenuItem key={file} value={file}>{file}</MenuItem>

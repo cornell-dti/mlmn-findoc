@@ -61,15 +61,19 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </div>
         <nav className="flex flex-col p-4">
           <div className={"text-white"}>File History</div>
-          {files.map((file) => (<div key={file} className="mt-2 flex items-center relative">
-              <Link
-                href="/"
-                className={`block text-gray-300 hover:bg-blue-700 p-2 w-full rounded flex items-center`}
-              >
-                <img src="/icons/summarize.png" alt="Test" className="w-6 h-6 mr-2" />
-                {file}
-              </Link>
-            </div>))}
+          <div style={{ overflowY: 'auto', height: '145px' }}>
+            {files.map((file) => (
+              <div key={file} className="mt-2 flex items-center relative">
+                <Link
+                  href="/"
+                  className={`block text-gray-300 hover:bg-blue-700 p-2 w-full rounded flex items-center`}
+                >
+                  <img src="/icons/summarize.png" alt="Test" className="w-6 h-6 mr-2" />
+                  {file}
+                </Link>
+              </div>
+            ))}
+          </div>
           <div className={"text-white"} style={{ marginTop: '25px' }}>Function</div>
           {pages.map((page) => (
             <div key={page.index} className="mt-2 flex items-center relative">
