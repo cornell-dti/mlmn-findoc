@@ -18,16 +18,21 @@ async function uploadFile(file: File | File[], endpoint: string, options: { [key
     return response;
 }
 
-async function processResponse(response: Response, setMessages: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>): Promise<void> {
+async function processResponse(response: Response, setMessages: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>, setDocumentID: React.Dispatch<React.SetStateAction<string | null>>): Promise<void> {
     if (response.ok && response.body) {
         const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
         while (true) {
             const { done, value } = await reader.read();
             if (done) { break; }
+            console.log(value)
             const content: Content = JSON.parse(value);
+            console.log(content)
             for (const [key, value] of Object.entries(content)) {
                 if (key === "get_dates") {
-                    const dates = processDatesResponse(value, setMessages);
+                    const text = value[0]
+                    console.log(value[1])
+                    setDocumentID(value[1]);
+                    const dates = processDatesResponse(text, setMessages);
                     setMessages((prevMessages) => ({
                         ...prevMessages,
                         [key]: dates,
@@ -35,7 +40,8 @@ async function processResponse(response: Response, setMessages: React.Dispatch<R
                     continue;
                 }
                 let messageSection = "";
-                const words = value.split(" ");
+                const text = value[0]
+                const words = text.split(" ");
                 for (let index = 0; index < words.length; index++) {
                     messageSection += words[index] + (index < words.length - 1 ? " " : "");
                 }

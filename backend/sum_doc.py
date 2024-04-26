@@ -44,15 +44,20 @@ def do_task(doc: str, system_prompt, human_prompt):
                 answer=final_output.content,
                 documentId=doc_id,
             )
-            return final_output.content, doc_id, q_id
+            return final_output.content, str(doc_id), str(q_id)
         else:
             doc_id = insert_doc(doc=doc)
+            print(
+                "insertiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiing documeeeeeeeeeeeeent",
+                doc_id,
+            )
             insert_qa(
                 query=human_prompt.format(text=""),
                 answer=final_output.content,
                 documentId=doc_id,
             )
-        return final_output.content, doc_id
+        return final_output.content, str(doc_id)
+
 
 def sum_doc(doc: str):
     return do_task(doc, SUMMARIZE_SYSTEM_PROMPT_SYLLABUS, SUMMARIZE_HUMAN_PROMPT)

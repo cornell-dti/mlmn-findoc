@@ -42,7 +42,7 @@ def process_query(doc: str, query: str):
             if closest_query_dist:
                 print(f"closest query distance: {closest_query_dist}")
                 if closest_query_dist >= 0.75:
-                    return closest_query[0][0]["entity"]["answer"], doc_id
+                    return closest_query[0][0]["entity"]["answer"], str(doc_id)
             raise Exception("Query not found", doc_id)
     raise Exception("Document not found")
 

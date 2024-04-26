@@ -17,7 +17,7 @@ const Message = (props: { sender: string; content: string; pfp: string; timestam
   );
 };
 
-const Chat = (props: { messages: Message[]; doc_id: BigInt }) => {
+const Chat = (props: { messages: any; doc_id: string }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const { data: session } = useSession();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -31,18 +31,15 @@ const Chat = (props: { messages: Message[]; doc_id: BigInt }) => {
       timestamp: new Date(),
     };
     const gptResponse = await fetchResponse(inputRef.current?.value!);
+    gptResponse.content = gptResponse.content[0];
+
     setMessages([...messages, userMessage, gptResponse]);
-    inputRef.current!.value = ""; // clear input after sending
+    inputRef.current!.value = "";
   };
 
   const fetchResponse = async (message: string): Promise<Message> => {
     setLoading(true);
-    const doc = await fetch("http://localhost:8080/doc/" + props.doc_id);
-    // headers: {
-    //   "Content-Type": "application/json",
-    // },
-    // body: JSON.stringify({ doc: props.doc_id, query: message }),
-    // });
+    const doc = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/doc/${props.doc_id}`);
     const doc_text = await doc.json();
     const response = await fetch("http://localhost:8080/followup", {
       method: "POST",
@@ -64,8 +61,14 @@ const Chat = (props: { messages: Message[]; doc_id: BigInt }) => {
   };
 
   useEffect(() => {
-    console.log("messages", messages);
-  }, [messages]);
+    const msgs = Object.values(props.messages).map((msg) => ({
+      sender: "chat", // msg.sender === session?.user?.name ? "me" : "chat
+      content: (msg as string) ?? "",
+      pfp: "https://avatars.githubusercontent.com/u/19356609?s=280&v=4",
+      timestamp: new Date(),
+    }));
+    setMessages(msgs);
+  }, [props.messages]);
 
   const InputField = () => {
     return (

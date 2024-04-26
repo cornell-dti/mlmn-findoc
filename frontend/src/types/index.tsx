@@ -13,4 +13,4 @@ export type Message = {
   timestamp: Date;
 };
 
-export type Content = { [key: string]: string };
+export type Content = { [key: string]: [string, string, string] | [string, string] };

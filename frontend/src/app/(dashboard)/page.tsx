@@ -8,28 +8,14 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-  DialogTitle,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-} from "@mui/material";
+import { DialogTitle, FormControl, IconButton, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { getSession } from "next-auth/react";
 import Chat from "@/components/ScrollingChat";
 import supabase from "@/utils/supabase";
 import { TbRuler } from "react-icons/tb";
 import "./page.css";
 
-const summary_options = [
-  "policies",
-  "dates",
-  "summary",
-  "resources",
-  "instructors",
-];
+const summary_options = ["policies", "dates", "summary", "resources", "instructors"];
 
 interface HomeProps {
   function: string;
@@ -51,15 +37,14 @@ const Home: React.FC<HomeProps> = (props) => {
   const [file, setFile] = React.useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [documentID, setDocumentID] = useState<string | null>(null);
 
   const options_to_use = summary_options.reduce((acc: any, option) => {
     acc[option] = false;
     return acc;
   }, {});
 
-  const [options, setOptions] = useState<{ [key: string]: boolean }>(
-    options_to_use
-  );
+  const [options, setOptions] = useState<{ [key: string]: boolean }>(options_to_use);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [dialogContent, setDialogContent] = useState<{
     title: string;
@@ -75,15 +60,16 @@ const Home: React.FC<HomeProps> = (props) => {
     setOpenDialog(false);
   };
 
-  const handleDocumentNameChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleDocumentNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSavedDocumentName(event.target.value);
   };
 
-  const handleSubmitButton = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSubmitButton = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     console.log(savedDocumentName);
+    const response = await uploadFile(firstFile!, "summarize", options);
+    await processResponse(response, setMessages, setDocumentID);
+
     setIsSubmitted(true);
     setIsTransitioning(true);
   };
@@ -134,9 +120,7 @@ const Home: React.FC<HomeProps> = (props) => {
     });
   }, []);
 
-  const handleFirstFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): Promise<void> => {
+  const handleFirstFileUpload = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const files = event.target.files;
     if (files && files[0]) {
       setMessages({});
@@ -158,22 +142,17 @@ const Home: React.FC<HomeProps> = (props) => {
 
       try {
         setSubmitDisabled(false);
-        const response = await uploadFile(files[0], "summarize", options);
-        await processResponse(response, setMessages);
+        // const response = await uploadFile(files[0], "summarize", options);
+        // await processResponse(response, setMessages);
       } catch (error) {
-        console.error(
-          "Error during file upload or response processing:",
-          error
-        );
+        console.error("Error during file upload or response processing:", error);
       } finally {
         setIsProcessing(false);
       }
     }
   };
 
-  const handleSecondFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): Promise<void> => {
+  const handleSecondFileUpload = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const files = event.target.files;
     if (files && files[0] && firstFile) {
       setSecondFileName(files[0].name);
@@ -182,7 +161,7 @@ const Home: React.FC<HomeProps> = (props) => {
       try {
         const response = await uploadFile(filesList, "compare", options);
         setMessages({});
-        await processResponse(response, setMessages);
+        await processResponse(response, setMessages, setDocumentID);
       } catch (error) {
         console.error("Error during file comparison:", error);
       } finally {
@@ -197,10 +176,7 @@ const Home: React.FC<HomeProps> = (props) => {
   };
 
   async function getFileHistory(): Promise<string[]> {
-    const response = await supabase
-      .from("user-doc")
-      .select("*")
-      .eq("userID", 9);
+    const response = await supabase.from("user-doc").select("*").eq("userID", 9);
 
     // Map the response data to extract the "docID" values
     return response.data?.map((val) => val["docID"]) as string[];
@@ -220,34 +196,23 @@ const Home: React.FC<HomeProps> = (props) => {
   return (
     <main className="flex flex-col items-center justify-between p-8">
       {!isSubmitted && (
-        <div
-          className={`page-transition ${
-            isTransitioning ? "page-transition-exit-active" : ""
-          }`}
-        >
+        <div className={`page-transition ${isTransitioning ? "page-transition-exit-active" : ""}`}>
           <div className="flex flex-col items-center justify-center h-full pt-2">
             <h1 className="text-4xl text-white mb-6">
               {isSummarize ? "What do you want to summarize?" : ""}
               {!firstFileContent && isParse ? "What do you want to parse?" : ""}
               {isCompare ? "What do you want to compare?" : ""}
-              {firstFileContent && isParse
-                ? "Select all information you want to parse"
-                : ""}
+              {firstFileContent && isParse ? "Select all information you want to parse" : ""}
             </h1>
 
             {firstFileContent && isParse ? (
-              <div
-                className="flex justify-center gap-5 w-full"
-                style={{ marginBottom: "20px" }}
-              >
+              <div className="flex justify-center gap-5 w-full" style={{ marginBottom: "20px" }}>
                 {summary_options.map((option, index) => (
                   <div
                     key={index}
                     onClick={() => handleOptionChange(option)}
                     className={`rounded-md shadow cursor-pointer p-4 transition-colors duration-300 ${
-                      options[option]
-                        ? "selected-background"
-                        : "default-background"
+                      options[option] ? "selected-background" : "default-background"
                     } border border-gray-200 flex flex-col items-center justify-center flex-grow`}
                     style={{
                       width: "150px",
@@ -258,9 +223,7 @@ const Home: React.FC<HomeProps> = (props) => {
                       maxHeight: "75px",
                     }}
                   >
-                    <div className="text-white text-lg font-medium">
-                      {option}
-                    </div>
+                    <div className="text-white text-lg font-medium">{option}</div>
                   </div>
                 ))}
               </div>
@@ -275,26 +238,13 @@ const Home: React.FC<HomeProps> = (props) => {
                     isProcessing ? ".default-background" : ".default-background"
                   } max-w-sm`}
                 >
-                  <label
-                    htmlFor="first-file-upload"
-                    className="flex flex-col align-center justify-center text-center"
-                  >
+                  <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
                     <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
-                      <Image
-                        src="/icons/upload-file.png"
-                        alt="Upload"
-                        className="mx-auto"
-                        width={50}
-                        height={50}
-                      />
+                      <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
                       {uploadedFileName ? (
-                        <span className="text-sm text-blue-500">
-                          {uploadedFileName}
-                        </span>
+                        <span className="text-sm text-blue-500">{uploadedFileName}</span>
                       ) : (
-                        <label className="text-sm -mb-2">
-                          Upload first file
-                        </label>
+                        <label className="text-sm -mb-2">Upload first file</label>
                       )}
                     </div>
                     {!uploadedFileName && (
@@ -304,13 +254,7 @@ const Home: React.FC<HomeProps> = (props) => {
                       </span>
                     )}
                   </label>
-                  <input
-                    id="first-file-upload"
-                    type="file"
-                    accept=".txt"
-                    className="hidden"
-                    onChange={handleFirstFileUpload}
-                  />
+                  <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
                 </div>
               ) : (
                 ""
@@ -341,10 +285,7 @@ const Home: React.FC<HomeProps> = (props) => {
                       color: "white", // Optional: If you also want to change the color of the input label and icon
                     }}
                   >
-                    <InputLabel
-                      id="demo-simple-select-label"
-                      style={{ color: "white" }}
-                    >
+                    <InputLabel id="demo-simple-select-label" style={{ color: "white" }}>
                       Select from existing file
                     </InputLabel>
                     <Select
@@ -388,26 +329,13 @@ const Home: React.FC<HomeProps> = (props) => {
                     isProcessing ? "bg-gray-200" : "bg-transparent"
                   } max-w-sm`}
                 >
-                  <label
-                    htmlFor="second-file-upload"
-                    className="flex flex-col align-center justify-center text-center"
-                  >
+                  <label htmlFor="second-file-upload" className="flex flex-col align-center justify-center text-center">
                     <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
-                      <Image
-                        src="/icons/upload-file.png"
-                        alt="Upload"
-                        className="mx-auto"
-                        width={50}
-                        height={50}
-                      />
+                      <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
                       {secondFileName ? (
-                        <span className="text-sm text-blue-500">
-                          {secondFileName}
-                        </span>
+                        <span className="text-sm text-blue-500">{secondFileName}</span>
                       ) : (
-                        <label className="text-sm -mb-2">
-                          Upload second file
-                        </label>
+                        <label className="text-sm -mb-2">Upload second file</label>
                       )}
                     </div>
                     {!secondFileName && (
@@ -417,13 +345,7 @@ const Home: React.FC<HomeProps> = (props) => {
                       </span>
                     )}
                   </label>
-                  <input
-                    id="second-file-upload"
-                    type="file"
-                    accept=".txt"
-                    className="hidden"
-                    onChange={handleSecondFileUpload}
-                  />
+                  <input id="second-file-upload" type="file" accept=".txt" className="hidden" onChange={handleSecondFileUpload} />
                 </div>
               )}
             </div>
@@ -431,10 +353,7 @@ const Home: React.FC<HomeProps> = (props) => {
             {isSummarize || isParse ? (
               <>
                 <div className="flex flex-col items-center mt-4">
-                  <label
-                    htmlFor="document-name"
-                    className="text-white font-bold mb-2"
-                  >
+                  <label htmlFor="document-name" className="text-white font-bold mb-2">
                     What do you want to call this document?
                   </label>
                   <input
@@ -450,9 +369,7 @@ const Home: React.FC<HomeProps> = (props) => {
                     onClick={handleSubmitButton}
                     disabled={submitDisabled}
                     className={`mt-3 w-3/4 bg-buttonColor text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm ${
-                      !submitDisabled
-                        ? "hover:bg-hoverColor"
-                        : "opacity-80 cursor-not-allowed"
+                      !submitDisabled ? "hover:bg-hoverColor" : "opacity-80 cursor-not-allowed"
                     }`}
                   >
                     Submit
@@ -462,22 +379,14 @@ const Home: React.FC<HomeProps> = (props) => {
             ) : (
               ""
             )}
-            {isProcessing && (
-              <h2 className="text-white text-lg">Processing...</h2>
+            {isProcessing && <h2 className="text-white text-lg">Processing...</h2>}
+            {isParse && options.dates && !isProcessing && firstFile !== null && (
+              <div className="flex flex-col items-center justify-center">
+                <button className="bg-buttonColor text-normal text-white text-sm font-bold py-2 px-7 rounded mt-4" onClick={onExportClick}>
+                  Export to Google Calendar
+                </button>
+              </div>
             )}
-            {isParse &&
-              options.dates &&
-              !isProcessing &&
-              firstFile !== null && (
-                <div className="flex flex-col items-center justify-center">
-                  <button
-                    className="bg-buttonColor text-normal text-white text-sm font-bold py-2 px-7 rounded mt-4"
-                    onClick={onExportClick}
-                  >
-                    Export to Google Calendar
-                  </button>
-                </div>
-              )}
             {/* <div className="overflow-x-scroll overflow-y-hidden max-w-screen-lg mt-10 max-h-80">
           <div className="flex flex-no-wrap max-h-96">
             {Object.entries(messages).map(([key, message], index) =>
@@ -535,7 +444,7 @@ const Home: React.FC<HomeProps> = (props) => {
               ? `Processing ${uploadedFileName}`
               : `Comparing ${uploadedFileName} and ${secondFileName}`}
           </h3>
-          <Chat messages={[]} doc_id={448985163764905353} />
+          <Chat messages={messages} doc_id={documentID!} />
         </div>
       )}
     </main>
