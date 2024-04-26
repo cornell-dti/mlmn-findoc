@@ -42,7 +42,7 @@ def process_query(doc: str, query: str):
             if closest_query_dist:
                 print(f"closest query distance: {closest_query_dist}")
                 if closest_query_dist >= 0.75:
-                    return closest_query[0][0]["entity"]["answer"]
+                    return closest_query[0][0]["entity"]["answer"], doc_id
             raise Exception("Query not found", doc_id)
     raise Exception("Document not found")
 
@@ -53,6 +53,24 @@ def insert_doc(doc: str):
         client=client, collectionName="DocumentCollection"
     ).insert(doc_schema)
     return doc_id
+
+
+def get_doc_text_by_id(doc_id: int):
+    return MilvusInteraction(
+        client=client, collectionName="DocumentCollection"
+    ).getDocbyID(doc_id)[0]["documentText"]
+
+
+def get_query_text_by_id(question_id: int):
+    return MilvusInteraction(
+        client=client, collectionName="QuestionAnswerCollection"
+    ).getQuerybyID(question_id)[0]["questionText"]
+
+
+def get_query_answer_by_id(question_id: int):
+    return MilvusInteraction(
+        client=client, collectionName="QuestionAnswerCollection"
+    ).getQuerybyID(question_id)[0]["answer"]
 
 
 def insert_qa(query: str, answer: str, documentId: int):
@@ -106,3 +124,15 @@ def get_qa_by_user(user_id: str, doc_id: str):
 
 
 # print(process_query(syllabus, "What class is this from?"))
+# def main():
+# res = client.delete(
+#     collection_name="DocumentCollection",
+#     filter="documentId > 0"
+# )
+# insert_doc("abcdefg")
+# insert_qa("What is the class?", "Discrete Structures", 448985163764905479)
+# print(get_doc_text_by_id(448985163764905479))
+#     print(get_query_text_by_id(448985163764905481))
+#     print(get_query_answer_by_id(448985163764905481))
+# if __name__ == "__main__":
+#     main()

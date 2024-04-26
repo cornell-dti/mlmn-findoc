@@ -1,8 +1,9 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { type Message } from "@/types";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import supabase from "@/utils/supabase";
+import { getDocsByUserId, getQueries, getUserIdByEmail, uploadDoc } from "@/utils/chatUtils";
 
 const Message = (props: { sender: string; content: string; pfp: string; timestamp: number }) => {
   return (
@@ -16,14 +17,7 @@ const Message = (props: { sender: string; content: string; pfp: string; timestam
   );
 };
 
-interface Message {
-  sender: string;
-  content: string;
-  pfp: string;
-  timestamp: Date;
-}
-
-const Chat = (props: { messages: Message[]; doc_id: number }) => {
+const Chat = (props: { messages: Message[]; doc_id: BigInt }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const { data: session } = useSession();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -43,13 +37,20 @@ const Chat = (props: { messages: Message[]; doc_id: number }) => {
 
   const fetchResponse = async (message: string): Promise<Message> => {
     setLoading(true);
-    // const doc = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/doc/${props.doc_id}`);
-    const response = await fetch("http://localhost:8080/");
+    const doc = await fetch("http://localhost:8080/doc/" + props.doc_id);
     // headers: {
     //   "Content-Type": "application/json",
     // },
     // body: JSON.stringify({ doc: props.doc_id, query: message }),
     // });
+    const doc_text = await doc.json();
+    const response = await fetch("http://localhost:8080/followup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ doc: doc_text, query: message }),
+    });
     const data = await response.json();
 
     const newMessage = {
@@ -66,7 +67,6 @@ const Chat = (props: { messages: Message[]; doc_id: number }) => {
     console.log("messages", messages);
   }, [messages]);
 
-
   const InputField = () => {
     return (
       <div className="flex items-center border border-blue-500 rounded-lg overflow-hidden mt-4">
@@ -75,12 +75,12 @@ const Chat = (props: { messages: Message[]; doc_id: number }) => {
           ref={inputRef}
           type="text"
           placeholder="Type a message..."
-          style={{ borderTopLeftRadius: '0.375rem', borderBottomLeftRadius: '0.375rem', borderRight: 'none' }}
+          style={{ borderTopLeftRadius: "0.375rem", borderBottomLeftRadius: "0.375rem", borderRight: "none" }}
         />
         <button
-          className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-r-lg"
+          className="bg-buttonColor hover:bg-hoverColor text-white py-2 px-4 rounded-r-lg"
           onClick={handleSend}
-          style={{ borderTopRightRadius: '0.375rem', borderBottomRightRadius: '0.375rem' }}
+          style={{ borderTopRightRadius: "0.375rem", borderBottomRightRadius: "0.375rem" }}
         >
           Send
         </button>
@@ -88,12 +88,10 @@ const Chat = (props: { messages: Message[]; doc_id: number }) => {
     );
   };
 
-
-
   return (
     <div className="flex flex-col w-full h-full p-4">
-      <div className="flex flex-col gap-1 overflow-auto">
-      {/* <div className="flex relative flex-col w-full h-full text-white"> */}
+      <div className="flex flex-col gap-1 overflow-auto w-full">
+        {/* <div className="flex relative flex-col w-full h-full text-white"> */}
         {/* <p className="text-white text-4xl mb-4"> Summary: </p> */}
         <p className="mb-3"> </p>
         <Message sender={session?.user?.name!} content="hello" pfp={session?.user?.image!} timestamp={Date.now()} />
@@ -104,6 +102,7 @@ const Chat = (props: { messages: Message[]; doc_id: number }) => {
           pfp={"https://avatars.githubusercontent.com/u/19356609?s=280&v=4"}
           timestamp={Date.now()}
         />
+        {loading && <p>Loading...</p>}
         {messages.map((msg, i) => (
           <Message key={i} sender={msg.sender} content={msg.content} pfp={msg.pfp} timestamp={msg.timestamp.getTime()} />
         ))}

@@ -8,13 +8,28 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseIcon from "@mui/icons-material/Close";
-import { DialogTitle, FormControl, IconButton, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import {
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+} from "@mui/material";
 import { getSession } from "next-auth/react";
 import Chat from "@/components/ScrollingChat";
 import supabase from "@/utils/supabase";
 import { TbRuler } from "react-icons/tb";
+import "./page.css";
 
-const summary_options = ["policies", "dates", "summary", "resources", "instructors"];
+const summary_options = [
+  "policies",
+  "dates",
+  "summary",
+  "resources",
+  "instructors",
+];
 
 interface HomeProps {
   function: string;
@@ -33,24 +48,30 @@ const Home: React.FC<HomeProps> = (props) => {
   const [savedDocumentName, setSavedDocumentName] = useState("");
   const [submitDisabled, setSubmitDisabled] = useState<boolean>(true);
   const [userEmail, setUserEmail] = useState<string>("");
-  const isSummarize = props.function === "summarize"
-  const isParse = props.function === "parse"
-  const isCompare = props.function === "compare"
-  const [file, setFile] = React.useState('');
+  const isSummarize = props.function === "summarize";
+  const isParse = props.function === "parse";
+  const isCompare = props.function === "compare";
+  const [file, setFile] = React.useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [output, setOutput] = useState<string>("");
   const [doneProcessing, setDoneProcessing] = useState<boolean>(false);
 
 
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const options_to_use = summary_options.reduce((acc: any, option) => {
-    acc[option] = true;
+    acc[option] = false;
     return acc;
   }, {});
 
-  const [options, setOptions] = useState<{ [key: string]: boolean }>(options_to_use);
+  const [options, setOptions] = useState<{ [key: string]: boolean }>(
+    options_to_use
+  );
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [dialogContent, setDialogContent] = useState<{ title: string; text: string }>({ title: "", text: "" });
+  const [dialogContent, setDialogContent] = useState<{
+    title: string;
+    text: string;
+  }>({ title: "", text: "" });
 
   const handleOpenDialog = (title: string, text: string) => {
     setDialogContent({ title, text });
@@ -61,7 +82,9 @@ const Home: React.FC<HomeProps> = (props) => {
     setOpenDialog(false);
   };
 
-  const handleDocumentNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDocumentNameChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setSavedDocumentName(event.target.value);
   };
 
@@ -69,6 +92,7 @@ const Home: React.FC<HomeProps> = (props) => {
     event.preventDefault();
     console.log(savedDocumentName);
     setIsSubmitted(true);
+    setIsTransitioning(true);
   };
 
   const handleOptionChange = (option: string) => {
@@ -77,7 +101,9 @@ const Home: React.FC<HomeProps> = (props) => {
       [option]: !options[option],
     });
   };
-
+  const onSubmitParse = (event: React.MouseEvent<HTMLButtonElement>) => {
+    // Handle the submission logic here
+  };
   useEffect(() => {
     window.addEventListener(
       "message",
@@ -115,7 +141,9 @@ const Home: React.FC<HomeProps> = (props) => {
     });
   }, []);
 
-  const handleFirstFileUpload = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+  const handleFirstFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): Promise<void> => {
     const files = event.target.files;
     if (files && files[0]) {
       setMessages({});
@@ -142,7 +170,10 @@ const Home: React.FC<HomeProps> = (props) => {
         const response = await uploadFile(firstFile, "summarize", options);
         await processResponse(response, setMessages);
       } catch (error) {
-        console.error("Error during file upload or response processing:", error);
+        console.error(
+          "Error during file upload or response processing:",
+          error
+        );
       } finally {
         setIsProcessing(false);
       }
@@ -198,12 +229,12 @@ const Home: React.FC<HomeProps> = (props) => {
 
   async function getFileHistory(): Promise<string[]> {
     const response = await supabase
-        .from("user-doc")
-        .select("*")
-        .eq("userID", 9);
+      .from("user-doc")
+      .select("*")
+      .eq("userID", 9);
 
     // Map the response data to extract the "docID" values
-    return response.data?.map(val => val["docID"]) as string[];
+    return response.data?.map((val) => val["docID"]) as string[];
   }
 
   const [files, setFiles] = useState<string[]>([]);
@@ -219,113 +250,168 @@ const Home: React.FC<HomeProps> = (props) => {
 
   return (
     <main className="flex flex-col items-center justify-between p-8">
-      <div className="flex flex-col items-center justify-center h-full pt-2">
-        <h1 className="text-4xl text-white mb-6">
-          {isSummarize ? "What do you want to summarize?" : ""}
-          {isParse ? "What do you want to parse?" : ""}
-          {isCompare ? "What do you want to compare?" : ""}
-        </h1>
+      {!isSubmitted && (
+        <div
+          className={`page-transition ${
+            isTransitioning ? "page-transition-exit-active" : ""
+          }`}
+        >
+          <div className="flex flex-col items-center justify-center h-full pt-2">
+            <h1 className="text-4xl text-white mb-6">
+              {isSummarize ? "What do you want to summarize?" : ""}
+              {!firstFileContent && isParse ? "What do you want to parse?" : ""}
+              {isCompare ? "What do you want to compare?" : ""}
+              {firstFileContent && isParse
+                ? "Select all information you want to parse"
+                : ""}
+            </h1>
 
-        {isParse ? (
-          <div className="flex items-center gap-2 text-white" style={{ marginBottom: "20px" }}>
-            {summary_options.map((option, index) => (
-              <div key={index} className="flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  id={option}
-                  name={option}
-                  checked={options[option]}
-                  onChange={() => handleOptionChange(option)}
-                  className="form-checkbox h-5 w-5 text-blue-600"
-                />
-                <label htmlFor={option} className="text-sm">
-                  {option}
-                </label>
+            {firstFileContent && isParse ? (
+              <div
+                className="flex justify-center gap-5 w-full"
+                style={{ marginBottom: "20px" }}
+              >
+                {summary_options.map((option, index) => (
+                  <div
+                    key={index}
+                    onClick={() => handleOptionChange(option)}
+                    className={`rounded-md shadow cursor-pointer p-4 transition-colors duration-300 ${
+                      options[option]
+                        ? "selected-background"
+                        : "default-background"
+                    } border border-gray-200 flex flex-col items-center justify-center flex-grow`}
+                    style={{
+                      width: "150px",
+                      height: "75px",
+                      minWidth: "150px",
+                      minHeight: "75px",
+                      maxWidth: "150px",
+                      maxHeight: "75px",
+                    }}
+                  >
+                    <div className="text-white text-lg font-medium">
+                      {option}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : (
-          ""
-        )}
+            ) : (
+              ""
+            )}
 
-        <div className="flex w-full justify-center gap-4 mb-4">
-          <div
-            className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
-              isProcessing ? "bg-gray-200" : "bg-transparent"
-            } max-w-sm`}
-          >
-            <label htmlFor="first-file-upload" className="flex flex-col align-center justify-center text-center">
-              <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
-                <Image src="/icons/upload-file.png" alt="Upload" className="mx-auto" width={50} height={50} />
-                {uploadedFileName ? (
-                  <span className="text-sm text-blue-500">{uploadedFileName}</span>
-                ) : (
-                  <label className="text-sm -mb-2">Upload first file</label>
-                )}
-              </div>
-              {!uploadedFileName && (
-                <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
-                  Drag and drop <br />
-                  or choose a file to upload
-                </span>
-              )}
-            </label>
-            <input id="first-file-upload" type="file" accept=".txt" className="hidden" onChange={handleFirstFileUpload} />
-          </div>
-
-          {isSummarize ? (
-            <>
-              <div className="text-white" style={{ marginTop: '65px' }}>or</div> 
-              <FormControl sx={{ 
-              width: '40%', 
-              marginTop: '50px', 
-              '.MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'white', 
-                  borderStyle: 'dashed',
-                },
-                '&:hover fieldset': {
-                  borderColor: 'white', 
-                  borderStyle: 'dashed', 
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'white',
-                  borderStyle: 'dashed', 
-                },
-              },
-              color: 'white', // Optional: If you also want to change the color of the input label and icon
-            }} >
-                <InputLabel id="demo-simple-select-label" style={{ color: 'white' }}>Select from existing file</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={file}
-                  label="Select from existing file"
-                  onChange={handleDropDownChange}
-                  sx={{
-                    color: 'white', // sets the color of the select input text
-                    '& .MuiSvgIcon-root': { // targets the dropdown arrow icon specifically
-                      color: 'white', // sets the color of the dropdown arrow
-                    },
-                  }}
-                  MenuProps={{
-                    autoFocus: false,
-                    PaperProps: {
-                      style: {
-                        height: "125px",
-                        overflowY: "scroll"
-                      }
-                    }}}
+            <div className="flex w-full justify-center gap-4 mb-4">
+              {(!firstFileContent && isParse) || isSummarize || isCompare ? (
+                <div
+                  className={`flex flex-col items-center justify-center border border-dashed rounded-lg px-6 pt-4 pb-6 ${
+                    isProcessing ? ".default-background" : ".default-background"
+                  } max-w-sm`}
                 >
-                  {files.map(file => (
-                    <MenuItem key={file} value={file}>{file}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </>
-          ) : (
-            ""
-          )} 
+                  <label
+                    htmlFor="first-file-upload"
+                    className="flex flex-col align-center justify-center text-center"
+                  >
+                    <div className="flex flex-col align-center text-white font-bold rounded mb-3 justify-center cursor-pointer">
+                      <Image
+                        src="/icons/upload-file.png"
+                        alt="Upload"
+                        className="mx-auto"
+                        width={50}
+                        height={50}
+                      />
+                      {uploadedFileName ? (
+                        <span className="text-sm text-blue-500">
+                          {uploadedFileName}
+                        </span>
+                      ) : (
+                        <label className="text-sm -mb-2">
+                          Upload first file
+                        </label>
+                      )}
+                    </div>
+                    {!uploadedFileName && (
+                      <span className="text-gray-500 text-center font-semibold text-sm min-w-min">
+                        Drag and drop <br />
+                        or choose a file to upload
+                      </span>
+                    )}
+                  </label>
+                  <input
+                    id="first-file-upload"
+                    type="file"
+                    accept=".txt"
+                    className="hidden"
+                    onChange={handleFirstFileUpload}
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+              {isSummarize ? (
+                <>
+                  <div className="text-white" style={{ marginTop: "65px" }}>
+                    or
+                  </div>
+                  <FormControl
+                    sx={{
+                      width: "40%",
+                      marginTop: "50px",
+                      ".MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor: "white",
+                          borderStyle: "dashed",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "white",
+                          borderStyle: "dashed",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "white",
+                          borderStyle: "dashed",
+                        },
+                      },
+                      color: "white", // Optional: If you also want to change the color of the input label and icon
+                    }}
+                  >
+                    <InputLabel
+                      id="demo-simple-select-label"
+                      style={{ color: "white" }}
+                    >
+                      Select from existing file
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      value={file}
+                      label="Select from existing file"
+                      onChange={handleDropDownChange}
+                      sx={{
+                        color: "white", // sets the color of the select input text
+                        "& .MuiSvgIcon-root": {
+                          // targets the dropdown arrow icon specifically
+                          color: "white", // sets the color of the dropdown arrow
+                        },
+                      }}
+                      MenuProps={{
+                        autoFocus: false,
+                        PaperProps: {
+                          style: {
+                            height: "125px",
+                            overflowY: "scroll",
+                          },
+                        },
+                      }}
+                    >
+                      {files.map((file) => (
+                        <MenuItem key={file} value={file}>
+                          {file}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </>
+              ) : (
+                ""
+              )}
 
           {uploadedFileName && isCompare && (
             <div
@@ -398,43 +484,57 @@ const Home: React.FC<HomeProps> = (props) => {
  
 
 
-          {isSummarize || isParse ? (
-          <>
-            <div className="flex flex-col items-center mt-4">
-              <label htmlFor="document-name" className="text-white font-bold mb-2">
-                What do you want to call this document?
-              </label>
-              <input
-                id="document-name"
-                type="text"
-                placeholder="Enter here"
-                value={savedDocumentName}
-                onChange={handleDocumentNameChange}
-                className="text-black w-3/4 px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 text-sm"
-              />
-              <button
-                type="submit"
-                onClick={handleSubmitButton}
-                disabled={submitDisabled}
-                className={`mt-3 w-3/4 bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm ${
-                  !submitDisabled ? 'hover:bg-blue-700' : 'opacity-80 cursor-not-allowed'
-                }`}              >
-                Submit
-              </button>
-            </div>
-          </>
-        ) : (
-          ""
-        )}
-        {isProcessing && <h2 className="text-white text-lg">Processing...</h2>}
-        {isParse && options.dates && !isProcessing && firstFile !== null && (
-          <div className="flex flex-col items-center justify-center">
-            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded mt-4" onClick={onExportClick}>
-              Export to Google Calendar
-            </button>
-          </div>
-        )}
-        <div className="overflow-x-scroll overflow-y-hidden max-w-screen-lg mt-10 max-h-80">
+            {isSummarize || isParse ? (
+              <>
+                <div className="flex flex-col items-center mt-4">
+                  <label
+                    htmlFor="document-name"
+                    className="text-white font-bold mb-2"
+                  >
+                    What do you want to call this document?
+                  </label>
+                  <input
+                    id="document-name"
+                    type="text"
+                    placeholder="Enter here"
+                    value={savedDocumentName}
+                    onChange={handleDocumentNameChange}
+                    className="text-black w-3/4 px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 text-sm"
+                  />
+                  <button
+                    type="submit"
+                    onClick={handleSubmitButton}
+                    disabled={submitDisabled}
+                    className={`mt-3 w-3/4 bg-buttonColor text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm ${
+                      !submitDisabled
+                        ? "hover:bg-hoverColor"
+                        : "opacity-80 cursor-not-allowed"
+                    }`}
+                  >
+                    Submit
+                  </button>
+                </div>
+              </>
+            ) : (
+              ""
+            )}
+            {isProcessing && (
+              <h2 className="text-white text-lg">Processing...</h2>
+            )}
+            {isParse &&
+              options.dates &&
+              !isProcessing &&
+              firstFile !== null && (
+                <div className="flex flex-col items-center justify-center">
+                  <button
+                    className="bg-buttonColor text-normal text-white text-sm font-bold py-2 px-7 rounded mt-4"
+                    onClick={onExportClick}
+                  >
+                    Export to Google Calendar
+                  </button>
+                </div>
+              )}
+            {/* <div className="overflow-x-scroll overflow-y-hidden max-w-screen-lg mt-10 max-h-80">
           <div className="flex flex-no-wrap max-h-96">
             {Object.entries(messages).map(([key, message], index) =>
               key === "dates" ? null : (
@@ -457,8 +557,8 @@ const Home: React.FC<HomeProps> = (props) => {
             )}
           </div>
         </div>
-
-        {/* <ScrollingChat
+ */}
+            {/* <ScrollingChat
           fileContent={firstFileContent}
           message={Object.values(messages).map((msg) => ({
             message: msg,
@@ -469,7 +569,7 @@ const Home: React.FC<HomeProps> = (props) => {
           }))}
         /> */}
 
-        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+            {/* <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
           <DialogContent>
             <IconButton aria-label="close" onClick={handleCloseDialog} style={{ position: "absolute", right: 8, top: 8 }}>
               <CloseIcon />
@@ -478,19 +578,21 @@ const Home: React.FC<HomeProps> = (props) => {
               <FormattedMessage message={dialogContent.text} />
             </div>
           </DialogContent>
-        </Dialog>
-      </div>
-
-      
+        </Dialog> */}
+          </div>
+        </div>
+      )}
       {isSubmitted && (
-      // {isSubmitted && firstFileContent && (
-        <>
-          <h3 className="text-4xl text-white mb-6" style={{ marginTop: "30px" }}>
-            Chat
+        <div className="flex flex-col items-center justify-end h-screen w-full">
+          <h3 className="text-4xl text-white mb-6">
+            {isSummarize
+              ? `Summarizing ${uploadedFileName}`
+              : isParse
+              ? `Processing ${uploadedFileName}`
+              : `Comparing ${uploadedFileName} and ${secondFileName}`}
           </h3>
-          {/* <Chat messages={[]} doc_id={448985163764905353} /> */}
           <Chat messages={[]} doc_id={448985163764905353} />
-        </>
+        </div>
       )}
     </main>
   );

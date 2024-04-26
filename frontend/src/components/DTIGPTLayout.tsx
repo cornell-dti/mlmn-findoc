@@ -65,7 +65,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             {files.map((file) => (
               <div key={file} className="mt-2 flex items-center relative">
                 <Link
-                  href="/"
+                  href={`/history/${file}`}
                   className={`block text-gray-300 hover:bg-blue-700 p-2 w-full rounded flex items-center`}
                 >
                   <img src="/icons/summarize.png" alt="Test" className="w-6 h-6 mr-2" />
